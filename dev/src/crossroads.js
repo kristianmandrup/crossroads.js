@@ -133,7 +133,7 @@
           request = request || '';
           defaultArgs = defaultArgs || [];
           try {
-            return _attemptParse(request, defaultArgs);
+            return this._attemptParse(request, defaultArgs);
           }
           // if an error occurs during routing, we fire the routingError signal on this route
           catch (error) {
@@ -215,7 +215,7 @@
             //should be decrement loop since higher priorities are added at the end of array
             n = routes.length;
             while (route = routes[--n]) {
-                if (!_matchRoute(request, res, route)) {
+                if (!this._matchRoute(request, res, route)) {
                   break;
                 }
             }
@@ -225,7 +225,7 @@
 
         _matchRoute : function (request, res, route) {
           try {
-            return _attemptMatchRoute(request, res, route);
+            return this._attemptMatchRoute(request, res, route);
           }
           // if an error occurs during routing, we fire the routingError signal on this route
           catch (error) {
@@ -288,7 +288,10 @@
 
         // override to customize where/how errors are logged
         _logError : function (msg, error) {
-          console.error(msg + ': ' + error.toString());
+          var errMsg = msg + ': ' + error.toString();
+          console.log(errMsg)
+          // console.error(errMsg);
+
         },
     };
 

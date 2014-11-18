@@ -1,7 +1,7 @@
 /** @license
  * crossroads <http://millermedeiros.github.com/crossroads.js/>
  * Author: Miller Medeiros | MIT License
- * v0.12.0 (2014/11/18 18:09)
+ * v0.12.0 (2014/11/18 19:36)
  */
 
 (function () {
@@ -235,8 +235,7 @@ var factory = function (signals) {
           request = request || '';
           defaultArgs = defaultArgs || [];
           try {
-
-            return _attemptParse(request, defaultArgs);
+            return this._attemptParse(request, defaultArgs);
           }
           // if an error occurs during routing, we fire the routingError signal on this route
           catch (error) {
@@ -284,7 +283,7 @@ var factory = function (signals) {
             while (prev = this._prevRoutes[i++]) {
                 //check if switched exist since route may be disposed
                 if(prev.route.switched && !prev.route.active) {
-                    prev.route.switched.dispatch(request);
+                    prev.route.switch(request);
                 }
             }
         },
@@ -318,7 +317,7 @@ var factory = function (signals) {
             //should be decrement loop since higher priorities are added at the end of array
             n = routes.length;
             while (route = routes[--n]) {
-                if (!_matchRoute(request, res, route)) {
+                if (!this._matchRoute(request, res, route)) {
                   break;
                 }
             }
@@ -328,7 +327,7 @@ var factory = function (signals) {
 
         _matchRoute : function (request, res, route) {
           try {
-            return _attemptMatchRoute(request, res, route);
+            return this._attemptMatchRoute(request, res, route);
           }
           // if an error occurs during routing, we fire the routingError signal on this route
           catch (error) {
@@ -362,6 +361,7 @@ var factory = function (signals) {
                     }
 
                     route.active = true;
+                    route.activate(request);
                     res.push({
                         route : route,
                         params : params
@@ -390,7 +390,10 @@ var factory = function (signals) {
 
         // override to customize where/how errors are logged
         _logError : function (msg, error) {
-          console.error(msg + ': ' + error.toString());
+          var errMsg = msg + ': ' + error.toString();
+          console.log(errMsg)
+          // console.error(errMsg);
+
         },
     };
 
@@ -463,6 +466,71 @@ var factory = function (signals) {
         match : function (request) {
             request = request || '';
             return this._matchRegexp.test(request) && this._validateParams(request); //validate params even if regexp because of `request_` rule.
+        },
+
+        switch: function(request) {
+          this.willSwitch(request);
+          if (this.canSwitch(request)) {
+
+          } else {
+            this.cannotSwitch(request);
+          }
+        },
+
+        // TODO: signal
+        willSwitch : function(request) {
+
+        },
+
+        canSwitch: function(request) {
+
+        },
+
+        // triggered when not permitted to switch
+        cannotSwitch: function(request) {
+
+        },
+
+        doSwitch: function(request) {
+          this.switched.dispatch(request);
+          this.wasSwitched();
+        },
+
+        wasSwitched: function(request) {
+
+        },
+
+        activate : function(request) {
+          this.willActivate(request);
+          if (this.canActivate(request)) {
+            this.activated(request);
+          } else {
+            this.cannotActivate(request)
+          }
+        },
+
+        // TODO: signal
+        willActivate : function(request) {
+
+        },
+
+        // TODO: signal
+        activated : function(request) {
+
+        },
+
+        canActivate: function(request) {
+
+        },
+
+        // triggered when not permitted to activate
+        cannotActivate: function(request) {
+
+        },
+
+        // TODO: signal
+        deactivate : function(request) {
+
         },
 
         _validateParams : function (request) {
