@@ -14,8 +14,13 @@
         this._optionalParamsIds = isRegexPattern? null : patternLexer.getOptionalParamsIds(pattern);
         this._matchRegexp = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase);
         this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
+
         this.matched = new signals.Signal();
         this.switched = new signals.Signal();
+
+        this.couldntSwitch = new signals.Signal();
+        this.couldntActivate = new signals.Signal();
+
         if (callback) {
             if (typeof callback !== 'function') {
               throw Error("Route callback must be a function, was:" + typeof callback);
@@ -40,24 +45,56 @@
         switch: function(request) {
           this.willSwitch(request);
           if (this.canSwitch(request)) {
-
+            this.doSwitch(request);
           } else {
             this.cannotSwitch(request);
           }
         },
 
-        // TODO: signal
-        willSwitch : function(request) {
+        _hasActiveSignal: function(signal) {
+          return signal && signal.getNumListeners() > 0;
+        },
 
+        isSignalDelegate: function(delegate) {
+          if (!delegate)
+            return false;
+
+          var receiver = delegate._defaultSignalStrategy;
+          return receiver && typeof receiver == 'function';
+        },
+
+        _delegateSignal: function(signalName, delegate, args) {
+          if (_isActiveDelegate(delegate)) {
+            delegate._defaultSignalStrategy(signalName, args);
+            return true;
+          }
+          return false;
+        },
+
+        _defaultSignalStrategy : function(signalName) {
+          var args = [].slice.call(arguments, 1)
+          if (_hasActiveSignal(this[signalName])) {
+            this[switchName](args);
+            return true;
+          }
+          if (this._parent) {
+            _delegateSignal(signalName, this._parent, args);
+          } else {
+            _delegateSignal(signalName, this._router, args);
+          }
+        },
+
+        willSwitch : function(request) {
         },
 
         canSwitch: function(request) {
-
+          this._defaultSignalStrategy('couldSwitch', request)
+          return true;
         },
 
         // triggered when not permitted to switch
         cannotSwitch: function(request) {
-
+          this._defaultSignalStrategy('couldntSwitch', request)
         },
 
         doSwitch: function(request) {
@@ -66,40 +103,48 @@
         },
 
         wasSwitched: function(request) {
-
+          this._defaultSignalStrategy('wasSwitched', request)
         },
 
         activate : function(request) {
           this.willActivate(request);
           if (this.canActivate(request)) {
-            this.activated(request);
+            this.doActivate(request);
           } else {
             this.cannotActivate(request)
           }
         },
 
-        // TODO: signal
         willActivate : function(request) {
-
         },
 
-        // TODO: signal
-        activated : function(request) {
+        doActivate : function(request) {
+          this.active = true;
+          this._wasActivated(request);
+        },
 
+        _wasActivated: function(request) {
+          this._defaultSignalStrategy('wasActivated', request)
         },
 
         canActivate: function(request) {
-
+          this._defaultSignalStrategy('couldActivate', request)
+          return true;
         },
 
         // triggered when not permitted to activate
         cannotActivate: function(request) {
-
+          this._defaultSignalStrategy('couldntActivate', request)
         },
 
         // TODO: signal
-        deactivate : function(request) {
+        deactivate : function() {
+          this._deactivated();
+        },
 
+        _deactivated : function() {
+          this.active = false;
+          this._defaultSignalStrategy('wasDeactivated', this)
         },
 
         _validateParams : function (request) {

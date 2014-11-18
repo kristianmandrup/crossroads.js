@@ -1,7 +1,7 @@
 /** @license
  * crossroads <http://millermedeiros.github.com/crossroads.js/>
  * Author: Miller Medeiros | MIT License
- * v0.12.0 (2014/11/18 19:36)
+ * v0.12.0 (2014/11/18 23:12)
  */
 
 (function () {
@@ -445,8 +445,12 @@ var factory = function (signals) {
         this._optionalParamsIds = isRegexPattern? null : patternLexer.getOptionalParamsIds(pattern);
         this._matchRegexp = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase);
         this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
+
         this.matched = new signals.Signal();
         this.switched = new signals.Signal();
+        this.couldntSwitch = new signals.Signal();
+        this.couldntActivate = new signals.Signal();
+
         if (callback) {
             if (typeof callback !== 'function') {
               throw Error("Route callback must be a function, was:" + typeof callback);
@@ -471,24 +475,34 @@ var factory = function (signals) {
         switch: function(request) {
           this.willSwitch(request);
           if (this.canSwitch(request)) {
-
+            this.doSwitch(request);
           } else {
             this.cannotSwitch(request);
           }
         },
 
+        _defaultSwitchStrategy : function(switchName) {
+          var args = [].slice.call(arguments, 1)
+          if (this._parent) {
+            this._parent[switchName](args);
+          } else {
+            this._router[switchName](args);
+          }
+        },
+
         // TODO: signal
         willSwitch : function(request) {
-
+          this._defaultSwitchStrategy('willSwitch', request)
         },
 
         canSwitch: function(request) {
-
+          this._defaultSwitchStrategy('canSwitch', request)
         },
 
         // triggered when not permitted to switch
         cannotSwitch: function(request) {
-
+          this.couldntSwitch.dispatch(request);
+          this._defaultSwitchStrategy('cannotSwitch', request)
         },
 
         doSwitch: function(request) {
@@ -497,13 +511,13 @@ var factory = function (signals) {
         },
 
         wasSwitched: function(request) {
-
+          this._defaultSwitchStrategy('wasSwitched', request)
         },
 
         activate : function(request) {
           this.willActivate(request);
           if (this.canActivate(request)) {
-            this.activated(request);
+            this.doActivate(request);
           } else {
             this.cannotActivate(request)
           }
@@ -511,26 +525,37 @@ var factory = function (signals) {
 
         // TODO: signal
         willActivate : function(request) {
-
+          this._defaultSwitchStrategy('willActivate', request)
         },
 
         // TODO: signal
-        activated : function(request) {
+        doActivate : function(request) {
+          this.active = true;
+          this.wasActivated(request);
+        },
 
+        wasActivated: function(request) {
+          this._defaultSwitchStrategy('wasActivated', request)
         },
 
         canActivate: function(request) {
-
+          this._defaultSwitchStrategy('canActivate', request)
         },
 
         // triggered when not permitted to activate
         cannotActivate: function(request) {
-
+          this.couldntActivate.dispatch(request);
+          this._defaultSwitchStrategy('cannotActivate', request)
         },
 
         // TODO: signal
-        deactivate : function(request) {
+        deactivate : function() {
+          this.deactivated();
+        },
 
+        deactivated : function() {
+          this.active = false;
+          this._defaultSwitchStrategy('wasDeactivated', this)
         },
 
         _validateParams : function (request) {

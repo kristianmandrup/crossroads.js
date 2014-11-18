@@ -31,6 +31,6 @@
     },
     "scripts" : {
         "pretest" : "node build",
-        "test" : "node node_modules/.bin/jasmine-node dev/tests/spec"
+        "test" : "node node_modules/.bin/jasmine-node dev/tests/spec/signals.spec.js"
     }
 }
