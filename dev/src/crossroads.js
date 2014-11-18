@@ -181,7 +181,7 @@
             while (prev = this._prevRoutes[i++]) {
                 //check if switched exist since route may be disposed
                 if(prev.route.switched && !prev.route.active) {
-                    prev.route.switched.dispatch(request);
+                    prev.route.switch(request);
                 }
             }
         },
@@ -259,6 +259,7 @@
                     }
 
                     route.active = true;
+                    route.activate(request);
                     res.push({
                         route : route,
                         params : params

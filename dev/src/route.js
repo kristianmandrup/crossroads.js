@@ -37,6 +37,71 @@
             return this._matchRegexp.test(request) && this._validateParams(request); //validate params even if regexp because of `request_` rule.
         },
 
+        switch: function(request) {
+          this.willSwitch(request);
+          if (this.canSwitch(request)) {
+
+          } else {
+            this.cannotSwitch(request);
+          }
+        },
+
+        // TODO: signal
+        willSwitch : function(request) {
+
+        },
+
+        canSwitch: function(request) {
+
+        },
+
+        // triggered when not permitted to switch
+        cannotSwitch: function(request) {
+
+        },
+
+        doSwitch: function(request) {
+          this.switched.dispatch(request);
+          this.wasSwitched();
+        },
+
+        wasSwitched: function(request) {
+
+        },
+
+        activate : function(request) {
+          this.willActivate(request);
+          if (this.canActivate(request)) {
+            this.activated(request);
+          } else {
+            this.cannotActivate(request)
+          }
+        },
+
+        // TODO: signal
+        willActivate : function(request) {
+
+        },
+
+        // TODO: signal
+        activated : function(request) {
+
+        },
+
+        canActivate: function(request) {
+
+        },
+
+        // triggered when not permitted to activate
+        cannotActivate: function(request) {
+
+        },
+
+        // TODO: signal
+        deactivate : function(request) {
+
+        },
+
         _validateParams : function (request) {
             var rules = this.rules,
                 values = this._getParamsObject(request),
