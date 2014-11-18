@@ -95,4 +95,45 @@ describe('crossroads.addRoute()', function(){
 
     });
 
+    it('should add all routes from another router', function(){
+      var s1 = crossroads.addRoute('/foo');
+      var s2 = crossroads.addRoute('/bar');
+      var cr = crossroads.create();
+      // var a1 = cr.addRoute('/ipsum', {priority: 1});
+      var a1 = cr.addRoute('/ipsum');
+      var a2 = cr.addRoute('/lorum');
+
+      expect( crossroads.getNumRoutes() ).toBe( 2 );
+
+      expect( crossroads.getRoutes()[0]._pattern ).toBe( s2._pattern );
+
+      crossroads.addRoutes(cr);
+      // console.log(crossroads.getRoutesBy('pattern', 'priority').display());
+      // console.log(cr.getRoutesBy());
+
+      expect( crossroads.getRoutes()[0]._pattern ).toBe( a2._pattern );
+      expect( crossroads.getRoutes()[1]._pattern ).toBe( a1._pattern );
+      // console.log(cr.getRoutePatterns());
+      expect( cr.getRoutes()[0]._pattern ).toBe( a2._pattern );
+      expect( cr.getRoutes()[1]._pattern ).toBe( a1._pattern );
+    });
+
+
+  it('should add a route from another router', function(){
+    var s1 = crossroads.addRoute('/foo');
+    var cr = crossroads.create();
+    var a1 = cr.addRoute('/ipsum');
+
+    expect( crossroads.getNumRoutes() ).toBe( 1 );
+    // console.log(crossroads.getRoutePatterns());
+    expect( crossroads.getRoutes()[0]._pattern ).toBe( s1._pattern );
+
+    crossroads.addRoute(a1);
+    expect( crossroads.getNumRoutes() ).toBe( 2 );
+    // console.log(crossroads.getRoutePatterns());
+
+    expect( crossroads.getRoutes()[0]._pattern ).toBe( a1._pattern );
+    expect( crossroads.getRoutes()[1]._pattern ).toBe( s1._pattern );
+  });
+
 });

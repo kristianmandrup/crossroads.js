@@ -38,10 +38,48 @@
             return new Crossroads();
         },
 
-        addRoute : function (pattern, callback, priority) {
+        addRoute : function (route_or_pattern, options_or_handler, priority) {
+            var isRouteLike = typeof route_or_pattern == 'object' && route_or_pattern._pattern;
+
+            if (isRouteLike) {
+              return this.addRoute(route_or_pattern._pattern, route_or_pattern._handler, route_or_pattern._priority);
+            }
+            var pattern = route_or_pattern;
+            var callback = options_or_handler;
+            if (options_or_handler && typeof options_or_handler == 'object') {
+              console.log('options_or_handler', options_or_handler);
+              callback = options_or_handler.handler;
+              priority =  options_or_handler.priority;
+            }
+
+            // if (!(callback && typeof callback == 'function')) {
+            //   throw Error "Route constructor requires a callback function"
+            // }
+
             var route = new Route(pattern, callback, priority, this);
             this._sortedInsert(route);
             return route;
+        },
+
+        // can be used to add all routes of a Router or an Array of routes
+        // Note: Routes can be added in reverse order!
+        addRoutes : function (routable, options) {
+            options = options || {reverse: true}
+            var self = this;
+            var routes = [];
+            if (typeof routable.getRoutes == 'function') {
+                routes = routable.getRoutes();
+            }
+            var arrayLike = typeof routable == 'object' && routable.length;
+            if (routable instanceof Array || arrayLike) {
+              routes = routable;
+            }
+            routesClone = Array.prototype.slice.call(routes);
+            routes = options.reverse ? routesClone.reverse() : routesClone;
+            routes.forEach(function(route) {
+              self.addRoute(route);
+            });
+            return routes;
         },
 
         removeRoute : function (route) {
@@ -56,6 +94,36 @@
             }
             this._routes.length = 0;
         },
+
+        getRoutes : function () {
+            return this._routes;
+        },
+
+        getRoutesBy : function (properties) {
+            properties = properties || ['pattern', 'priority', 'greedy', 'paramsIds', 'optionalParamsIds'];
+            if (typeof properties == 'string') {
+              properties = [properties];
+            }
+            if (arguments.length > 1)
+              properties = [].slice.call(arguments);
+
+            var routes = this.getRoutes().map(function(route) {
+              var routeObj = {}
+              properties.forEach(function(prop) {
+                var propVal = route['_' + prop]
+                if (!!propVal && !(propVal instanceof Array && propVal.length === 0))
+                  routeObj[prop] = propVal;
+              })
+              return routeObj;
+            });
+
+            return routes;
+        },
+
+        getNumRoutes : function () {
+            return this.getRoutes().length;
+        },
+
 
         parse : function (request, defaultArgs) {
             request = request || '';
@@ -111,9 +179,6 @@
             }
         },
 
-        getNumRoutes : function () {
-            return this._routes.length;
-        },
 
         _sortedInsert : function (route) {
             //simplified insertion sort
@@ -186,3 +251,15 @@
     crossroads.NORM_AS_OBJECT = function (req, vals) {
         return [vals];
     };
+
+
+    // for iterating and displaying routes
+    function RoutesList() {}
+    RoutesList.prototype = Array.prototype;
+    RoutesList.prototype.display = function() {
+      return this.map(function(routeInfo) {
+        return Object.keys(routeInfo).map(function(key) {
+          return key + ': ' + routeInfo[key];
+        }).join(', ')
+      }).join('\n')
+    }

@@ -1,7 +1,7 @@
 /** @license
  * crossroads <http://millermedeiros.github.com/crossroads.js/>
  * Author: Miller Medeiros | MIT License
- * v0.12.0 (2014/01/23 17:08)
+ * v0.12.0 (2014/11/18 17:09)
  */
 
 (function () {
@@ -140,10 +140,48 @@ var factory = function (signals) {
             return new Crossroads();
         },
 
-        addRoute : function (pattern, callback, priority) {
+        addRoute : function (route_or_pattern, options_or_handler, priority) {
+            var isRouteLike = typeof route_or_pattern == 'object' && route_or_pattern._pattern;
+
+            if (isRouteLike) {
+              return this.addRoute(route_or_pattern._pattern, route_or_pattern._handler, route_or_pattern._priority);
+            }
+            var pattern = route_or_pattern;
+            var callback = options_or_handler;
+            if (options_or_handler && typeof options_or_handler == 'object') {
+              console.log('options_or_handler', options_or_handler);
+              callback = options_or_handler.handler;
+              priority =  options_or_handler.priority;
+            }
+
+            // if (!(callback && typeof callback == 'function')) {
+            //   throw Error "Route constructor requires a callback function"
+            // }
+
             var route = new Route(pattern, callback, priority, this);
             this._sortedInsert(route);
             return route;
+        },
+
+        // can be used to add all routes of a Router or an Array of routes
+        // Note: Routes can be added in reverse order!
+        addRoutes : function (routable, options) {
+            options = options || {reverse: true}
+            var self = this;
+            var routes = [];
+            if (typeof routable.getRoutes == 'function') {
+                routes = routable.getRoutes();
+            }
+            var arrayLike = typeof routable == 'object' && routable.length;
+            if (routable instanceof Array || arrayLike) {
+              routes = routable;
+            }
+            routesClone = Array.prototype.slice.call(routes);
+            routes = options.reverse ? routesClone.reverse() : routesClone;
+            routes.forEach(function(route) {
+              self.addRoute(route);
+            });
+            return routes;
         },
 
         removeRoute : function (route) {
@@ -158,6 +196,36 @@ var factory = function (signals) {
             }
             this._routes.length = 0;
         },
+
+        getRoutes : function () {
+            return this._routes;
+        },
+
+        getRoutesBy : function (properties) {
+            properties = properties || ['pattern', 'priority', 'greedy', 'paramsIds', 'optionalParamsIds'];
+            if (typeof properties == 'string') {
+              properties = [properties];
+            }
+            if (arguments.length > 1)
+              properties = [].slice.call(arguments);
+
+            var routes = this.getRoutes().map(function(route) {
+              var routeObj = {}
+              properties.forEach(function(prop) {
+                var propVal = route['_' + prop]
+                if (!!propVal && !(propVal instanceof Array && propVal.length === 0))
+                  routeObj[prop] = propVal;
+              })
+              return routeObj;
+            });
+
+            return routes;
+        },
+
+        getNumRoutes : function () {
+            return this.getRoutes().length;
+        },
+
 
         parse : function (request, defaultArgs) {
             request = request || '';
@@ -178,7 +246,7 @@ var factory = function (signals) {
             if (n) {
                 this._prevMatchedRequest = request;
 
-                this._notifyPrevRoutes(routes, request);
+                this._switchPrevRoutes(request);
                 this._prevRoutes = routes;
                 //should be incremental loop, execute routes in order
                 while (i < n) {
@@ -196,26 +264,14 @@ var factory = function (signals) {
             this._pipeParse(request, defaultArgs);
         },
 
-        _notifyPrevRoutes : function(matchedRoutes, request) {
+        _switchPrevRoutes : function(request) {
             var i = 0, prev;
             while (prev = this._prevRoutes[i++]) {
                 //check if switched exist since route may be disposed
-                if(prev.route.switched && this._didSwitch(prev.route, matchedRoutes)) {
+                if(prev.route.switched && !prev.route.active) {
                     prev.route.switched.dispatch(request);
                 }
             }
-        },
-
-        _didSwitch : function (route, matchedRoutes){
-            var matched,
-                i = 0;
-            while (matched = matchedRoutes[i++]) {
-                // only dispatch switched if it is going to a different route
-                if (matched.route === route) {
-                    return false;
-                }
-            }
-            return true;
         },
 
         _pipeParse : function(request, defaultArgs) {
@@ -225,9 +281,6 @@ var factory = function (signals) {
             }
         },
 
-        getNumRoutes : function () {
-            return this._routes.length;
-        },
 
         _sortedInsert : function (route) {
             //simplified insertion sort
@@ -302,6 +355,18 @@ var factory = function (signals) {
     };
 
 
+    // for iterating and displaying routes
+    function RoutesList() {}
+    RoutesList.prototype = Array.prototype;
+    RoutesList.prototype.display = function() {
+      return this.map(function(routeInfo) {
+        return Object.keys(routeInfo).map(function(key) {
+          return key + ': ' + routeInfo[key];
+        }).join(', ')
+      }).join('\n')
+    }
+
+
     // Route --------------
     //=====================
 
@@ -319,9 +384,10 @@ var factory = function (signals) {
         this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
         this.matched = new signals.Signal();
         this.switched = new signals.Signal();
-        if (callback) {
+        if (callback && typeof callback == 'function') {
             this.matched.add(callback);
         }
+        this._handler = callback;
         this._priority = priority || 0;
     }
 
@@ -470,11 +536,54 @@ var factory = function (signals) {
             return '[Route pattern:"'+ this._pattern +'", numListeners:'+ this.matched.getNumListeners() +']';
         },
 
-        addRoute : function (pattern, handler, priority) {
+        // can be used to add all routes of a Router or an Array of routes
+        // Note: Routes can be added in reverse order!
+        addRoutes : function (routable, options) {
+            options = options || {reverse: true}
+            var self = this;
+            var routes = [];
+            if (typeof routable.getRoutes == 'function') {
+                routes = routable.getRoutes();
+            }
+            var arrayLike = typeof routable == 'object' && routable.length;
+            if (routable instanceof Array || arrayLike) {
+              routes = routable;
+            }
+            routesClone = Array.prototype.slice.call(routes);
+            routes = options.reverse ? routesClone.reverse() : routesClone;
+
+            routes.forEach(function(route) {
+              self.addRoute(route);
+            });
+            return routes;
+        },
+
+        childRoutes: function() {
+            return this._children || [];
+        },
+
+        parentRoute: function() {
+            return this._parent;
+        },
+
+        addRoute : function (route_or_pattern, options_or_handler, priority) {
+            var isRouteLike = typeof route_or_pattern == 'object' && route_or_pattern._pattern;
+
+            if (isRouteLike) {
+              return this.addRoute(route_or_pattern._pattern, route_or_pattern._handler, route_or_pattern._priority);
+            }
+            var pattern = route_or_pattern;
+
+            var handler = options_or_handler;
+            if (options_or_handler && typeof options_or_handler == 'object') {
+              handler = options_or_handler.handler;
+              priority =  options_or_handler.priority;
+            }
+
             var basePattern = this._pattern,
                 route;
 
-            if (!pattern || typeof pattern == 'function') {
+            if (!pattern || typeof pattern === 'function') {
                 priority = handler;
                 handler = pattern;
                 pattern = '';
@@ -487,6 +596,8 @@ var factory = function (signals) {
 
             route = this._router.addRoute(basePattern + pattern, handler, priority);
             route._parent = this;
+            this._children = this._children || [];
+            this._children.push(route);
 
             // index routes should be matched together with parent route
             if (!pattern.length || pattern === '/')
@@ -505,7 +616,6 @@ var factory = function (signals) {
         }
 
     };
-
 
 
     // Pattern Lexer ------

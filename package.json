@@ -27,7 +27,7 @@
     },
     "devDependencies" : {
         "uglify-js" : "~1.2.3",
-        "jasmine-node" : "1.0.x"
+        "jasmine-node" : "~1.4.x"
     },
     "scripts" : {
         "pretest" : "node build",

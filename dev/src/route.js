@@ -16,9 +16,10 @@
         this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
         this.matched = new signals.Signal();
         this.switched = new signals.Signal();
-        if (callback) {
+        if (callback && typeof callback == 'function') {
             this.matched.add(callback);
         }
+        this._handler = callback;
         this._priority = priority || 0;
     }
 
@@ -167,11 +168,54 @@
             return '[Route pattern:"'+ this._pattern +'", numListeners:'+ this.matched.getNumListeners() +']';
         },
 
-        addRoute : function (pattern, handler, priority) {
+        // can be used to add all routes of a Router or an Array of routes
+        // Note: Routes can be added in reverse order!
+        addRoutes : function (routable, options) {
+            options = options || {reverse: true}
+            var self = this;
+            var routes = [];
+            if (typeof routable.getRoutes == 'function') {
+                routes = routable.getRoutes();
+            }
+            var arrayLike = typeof routable == 'object' && routable.length;
+            if (routable instanceof Array || arrayLike) {
+              routes = routable;
+            }
+            routesClone = Array.prototype.slice.call(routes);
+            routes = options.reverse ? routesClone.reverse() : routesClone;
+
+            routes.forEach(function(route) {
+              self.addRoute(route);
+            });
+            return routes;
+        },
+
+        childRoutes: function() {
+            return this._children || [];
+        },
+
+        parentRoute: function() {
+            return this._parent;
+        },
+
+        addRoute : function (route_or_pattern, options_or_handler, priority) {
+            var isRouteLike = typeof route_or_pattern == 'object' && route_or_pattern._pattern;
+
+            if (isRouteLike) {
+              return this.addRoute(route_or_pattern._pattern, route_or_pattern._handler, route_or_pattern._priority);
+            }
+            var pattern = route_or_pattern;
+
+            var handler = options_or_handler;
+            if (options_or_handler && typeof options_or_handler == 'object') {
+              handler = options_or_handler.handler;
+              priority =  options_or_handler.priority;
+            }
+
             var basePattern = this._pattern,
                 route;
 
-            if (!pattern || typeof pattern == 'function') {
+            if (!pattern || typeof pattern === 'function') {
                 priority = handler;
                 handler = pattern;
                 pattern = '';
@@ -184,6 +228,8 @@
 
             route = this._router.addRoute(basePattern + pattern, handler, priority);
             route._parent = this;
+            this._children = this._children || [];
+            this._children.push(route);
 
             // index routes should be matched together with parent route
             if (!pattern.length || pattern === '/')
@@ -202,4 +248,3 @@
         }
 
     };
-
