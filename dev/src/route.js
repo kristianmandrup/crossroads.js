@@ -16,10 +16,13 @@
         this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
         this.matched = new signals.Signal();
         this.switched = new signals.Signal();
-        if (callback && typeof callback == 'function') {
+        if (callback) {
+            if (typeof callback !== 'function') {
+              throw Error("Route callback must be a function, was:" + typeof callback);
+            }
             this.matched.add(callback);
+            this._handler = callback;
         }
-        this._handler = callback;
         this._priority = priority || 0;
     }
 
@@ -185,7 +188,8 @@
             routes = options.reverse ? routesClone.reverse() : routesClone;
 
             routes.forEach(function(route) {
-              self.addRoute(route);
+              var clonedRoute = Object.create(route);
+              self.addRoute(clonedRoute);
             });
             return routes;
         },

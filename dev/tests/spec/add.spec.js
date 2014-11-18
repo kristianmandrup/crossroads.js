@@ -98,7 +98,7 @@ describe('crossroads.addRoute()', function(){
     it('should add all routes from another router', function(){
       var s1 = crossroads.addRoute('/foo');
       var s2 = crossroads.addRoute('/bar');
-      var cr = crossroads.create();
+      var cr = crossroads.create('other');
       // var a1 = cr.addRoute('/ipsum', {priority: 1});
       var a1 = cr.addRoute('/ipsum');
       var a2 = cr.addRoute('/lorum');
@@ -107,12 +107,17 @@ describe('crossroads.addRoute()', function(){
 
       expect( crossroads.getRoutes()[0]._pattern ).toBe( s2._pattern );
 
+      expect( s1._router._name ).toBe( 'crossroads router' );
+      expect( a1._router._name ).toBe( 'other' );
+
       crossroads.addRoutes(cr);
       // console.log(crossroads.getRoutesBy('pattern', 'priority').display());
       // console.log(cr.getRoutesBy());
 
       expect( crossroads.getRoutes()[0]._pattern ).toBe( a2._pattern );
       expect( crossroads.getRoutes()[1]._pattern ).toBe( a1._pattern );
+      expect( crossroads.getRoutes()[1]._router._name ).toBe( 'crossroads router' );
+
       // console.log(cr.getRoutePatterns());
       expect( cr.getRoutes()[0]._pattern ).toBe( a2._pattern );
       expect( cr.getRoutes()[1]._pattern ).toBe( a1._pattern );
