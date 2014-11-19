@@ -6,7 +6,7 @@ BaseRoutable.prototype = {
 
 }
 
-ChildRoute = {
+var ChildRoute = {
   parentRoute: function() {
       return this._parent;
   }

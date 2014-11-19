@@ -1,4 +1,14 @@
+if (Signal) {
+  Signal.prototype.isActive = function() {
+    return this.active && this.getNumListeners() > 0;
+  }
+}
+
 var SignalHelper = {
+  createSignal: function() {
+    return new signals.Signal();
+  },
+
   _isSignalDelegate: function(delegate) {
     if (!delegate)
       return false;

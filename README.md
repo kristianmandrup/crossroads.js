@@ -21,16 +21,29 @@ See [project page](http://millermedeiros.github.com/crossroads.js/) for document
 
 This fork offers the following extra features:
 
+Router and Route have been split up into several small grouped API objects, to be found in `/src`:
+
+- `/routable` : Base prototypes (classes)
+- `/route` : Route APIs and helpers
+- `/router` : Router APIs and helpers
+- `/signal` : Signal APIs and helpers
+- `/util` : Utility APIs
+
+The idea is to not force you in to having to use all the "bells & whistels", but instead allow you to compose your Router and Route APIs from composable blocks.
+
 ### Prototype design
 
 Base functionality for Router and Route is defined in `BaseRoute`
-
 Any Route/Router which can add routes to itself is a `CompositeRoute`.
+Here is an illustration of the basic Prototype (class) hierarchy.
 
 ```
 Route < BaseRoute
 Router < CompositeRoute < BaseRoute
 ```
+
+`Xtender.extend` is used to extend an Object (uses `xtend` by default).
+You can override this function to provide your own extension mechanism.
 
 ```js
 Xtender.extend(Route.prototype, BaseRoutable.prototype);

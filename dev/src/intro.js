@@ -6,6 +6,18 @@
     // Helpers -----------
     //====================
 
+    var Xtender = {
+      extend: require("xtend")
+    };
+
+    if (!Object.create) {
+      Object.create = function(proto) {
+          function F(){}
+          F.prototype = proto;
+          return new F;
+      }
+    }
+
     // IE 7-8 capture optional groups as empty strings while other browsers
     // capture as `undefined`
     _hasOptionalGroupBug = (/t(.+)?/).exec('t')[1] === '';

@@ -2,7 +2,7 @@
     // Pattern Lexer ------
     //=====================
 
-    Crossroads.prototype.patternLexer = (function () {
+    PatternLexer = (function () {
 
         var
             //match chars that should be escaped on string regexp
@@ -226,4 +226,3 @@
         };
 
     }());
-

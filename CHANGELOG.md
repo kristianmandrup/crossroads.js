@@ -1,5 +1,10 @@
 # Crossroads.js Changelog #
 
+## v0.13.0 (2014/11/20) ##
+
+- Too many updates and changes to list here...
+- See README for an overview
+
 ## v0.12.0 (2013/01/21) ##
 
  - improve `Route.interpolate()` to support query strings. (#76)

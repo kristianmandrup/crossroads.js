@@ -1,5 +1,4 @@
 var CompositeRoutable = function() {
-
 }
 
 CompositeRoutable.prototype = {
@@ -55,6 +54,7 @@ CompositeRoutable.prototype = {
       return this._routes || [];
   },
 
+  // For nested route only?
   addRoute : function (route_or_pattern, options_or_handler, priority) {
       var isRouteLike = typeof route_or_pattern == 'object' && route_or_pattern._pattern;
 

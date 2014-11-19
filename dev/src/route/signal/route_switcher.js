@@ -1,4 +1,4 @@
-RouteSwitcher = {
+var RouteSwitcher = {
   switch: function(request) {
     this.willSwitch(request);
     if (this.canSwitch(request)) {
@@ -7,7 +7,6 @@ RouteSwitcher = {
       this.cannotSwitch(request);
     }
   },
-
 
   willSwitch : function(request) {
   },

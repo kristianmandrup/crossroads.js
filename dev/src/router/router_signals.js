@@ -6,5 +6,7 @@ var RouterSignals = {
     } else {
       logWarning("No signal for:" + signalName);
     }
-  }  
+  }
 }
+
+var RouterSignalsAble = Xtender.extend(RouterSignals, SignalsAble);

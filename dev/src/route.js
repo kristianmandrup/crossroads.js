@@ -5,25 +5,22 @@ Route.prototype = BaseRoutable.prototype;
 
 Xtender.extend(Route.prototype, RouteApi);
 
+var FullRoute = Xtender.extend(RouteActivator, RouteSwitcher, RouteRequestParser, RouteValidation, RouteSignalsAble);
+var Xtender.extend(Route.prototype, FullRouter);
+
 /**
  * @constructor
  */
 
  // TODO: better API, use options object as 2nd argument!!
 function Route(pattern, callback, priority, router, name) {
-    var isRegexPattern = isRegExp(pattern),
-        patternLexer = router.patternLexer;
     this._router = router;
     this._name = name || 'unknown';
     this._pattern = pattern;
-    this._paramsIds = isRegexPattern? null : patternLexer.getParamIds(pattern);
-    this._optionalParamsIds = isRegexPattern? null : patternLexer.getOptionalParamsIds(pattern);
-    this._matchRegexp = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase);
-    this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
-
-    this.configureSignals(callback);
     this._priority = priority || 0;
 
+    this._lexPattern();
+    this.configureSignals(callback);
 }
 
 var RouteApi = {
@@ -32,18 +29,33 @@ var RouteApi = {
 
     rules : void(0),
 
+    _lexPattern: function() {
+      var isRegexPattern = isRegExp(this._pattern),
+          patternLexer = router.patternLexer;
+
+      this._paramsIds = isRegexPattern? null : patternLexer.getParamIds(pattern);
+      this._optionalParamsIds = isRegexPattern? null : patternLexer.getOptionalParamsIds(pattern);
+      this._matchRegexp = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase);
+      this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
+    },
+
     match : function (request) {
         request = request || '';
-        return this._matchRegexp.test(request) && this._validateParams(request); //validate params even if regexp because of `request_` rule.
+        //validate params even if regexp because of `request_` rule.
+        return this._matchRegexp.test(request) && this._validateParams(request);
     },
 
     interpolate : function(replacements) {
         var str = this._router.patternLexer.interpolate(this._pattern, replacements);
         if (! this._validateParams(str) ) {
-            throw new Error('Generated string doesn\'t validate against `Route.rules`.');
+          this._throwError('Generated string doesn\'t validate against `Route.rules`.')
         }
         return str;
     },
+
+    _throwError: function(msg) {
+      throw new Error(msg);
+    }
 
     dispose : function () {
         this._router.removeRoute(this);

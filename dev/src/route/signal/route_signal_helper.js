@@ -1,4 +1,4 @@
-RouteSignalHelper {
+var RouteSignalHelper = {
   _defaultSignalStrategy : function(signalName, request) {
     var args = this._defaultSignalArgs(request)
     if (this._canDispatch(signalName)) {
@@ -17,7 +17,5 @@ RouteSignalHelper {
     if (request)
       arg[request] = request;
     return arg
-  },
-
-
+  }
 }
