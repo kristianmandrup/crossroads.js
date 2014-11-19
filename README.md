@@ -21,6 +21,41 @@ See [project page](http://millermedeiros.github.com/crossroads.js/) for document
 
 This fork offers the following extra features:
 
+### Prototype design
+
+Base functionality for Router and Route is defined in `BaseRoute`
+
+Any Route/Router which can add routes to itself is a `CompositeRoute`.
+
+```
+Route < BaseRoute
+Router < CompositeRoute < BaseRoute
+```
+
+```js
+Xtender.extend(Route.prototype, BaseRoutable.prototype);
+Xtender.extend(Route.prototype, RouteApi);
+
+var RouteApi = {
+  // Route specific methods...
+}
+
+Xtender.extend(CompositeRoutable.prototype, BaseRoutable.prototype);
+
+// ...
+
+Xtender.extend(Route.prototype, CompositeRoutable.prototype;
+
+Xtender.extend(Router.prototype, RouterApi);
+
+var RouterApi = {
+  // Route specific methods...
+}
+```
+
+A `CompositeRoutable` can add any object which has `BaseRoutable` in its `prototype` path as a nested route.
+
+
 ### Route nesting
 
 The Goal is to use the Composite pattern. Both Router and Roue are Composites, since a Route
