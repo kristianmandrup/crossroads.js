@@ -26,6 +26,10 @@
         this._priority = priority || 0;
     }
 
+    Signal.prototype.isActive = function() {
+      return this.active && this.getNumListeners() > 0;
+    }
+
     Route.prototype = {
 
         greedy : false,
@@ -87,10 +91,6 @@
           }
         },
 
-        _hasActiveSignal: function(signal) {
-          return signal && signal.getNumListeners() > 0;
-        },
-
         _isSignalDelegate: function(delegate) {
           if (!delegate)
             return false;
@@ -109,8 +109,8 @@
 
         _defaultSignalStrategy : function(signalName, request) {
           var args = this._defaultSignalArgs(request)
-          if (_hasActiveSignal(this[signalName])) {
-            this[switchName](args);
+          if (this._canDispatch(signalName)) {
+            this._dispatch(signalName, args);
             return true;
           }
           if (this._parent) {
@@ -138,6 +138,22 @@
         // triggered when not permitted to switch
         cannotSwitch: function(request) {
           this._defaultSignalStrategy('couldntSwitch', request);
+        },
+
+        _isActiveSignal: function(signal) {
+          return signal && signal.isActive();
+        },
+
+        _canDispatch: function(signalName) {
+          return this._isActiveSignal(signalName);
+        },
+
+        _dispatch: function(signalName /*, args */) {
+          if (this._canDispatch(signalName)) {
+            var signal = this[signalName];
+            var args = [].slice.call(arguments, 1);
+            signal.dispatch(args);
+          }
         },
 
         doSwitch: function(request) {
