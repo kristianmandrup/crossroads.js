@@ -15,7 +15,79 @@ If used properly it can reduce code complexity by decoupling objects and also by
 See [project page](http://millermedeiros.github.com/crossroads.js/) for documentation and more details.
 
 
+## Design
 
+- See [crossroads.js API](http://millermedeiros.github.io/crossroads.js/) for an overview of the main API (v.0.12)
+
+This fork offers the following extra features:
+
+TODO!!!
+
+### Route nesting
+
+TODO!!!
+
+### Signals
+
+The Route has the following default Signal strategy:
+
+```js
+_defaultSignalStrategy : function(signalName, request) {
+  if (_hasActiveSignal(this[signalName])) {
+    this[switchName](request);
+    return true;
+  }
+  var args = this._defaultSignalArgs(request)
+  if (this._parent) {
+    _delegateSignal(signalName, this._parent, args);
+  } else {
+    _delegateSignal(signalName, this._router, args);
+  }
+},
+```
+
+It will pass any signal or delegate a hash with the route that activated and the incoming request.
+The strategy first checks if the route itself has a listener for that signal. If so it will use that signal and return. Otherwise it will delegate to the parent route if it is delegatable and finally fallback to calling the router itself to take care of handling the signal.
+
+The signals are:
+
+Activation:
+- couldActivate
+- wasActivated
+- couldntActivate
+
+Switching:
+- couldSwitch
+- wasSwitched
+- couldntSwitch
+
+Deactivation:
+- wasDeactivated
+
+Methods you can override for custom functionality:
+
+- willSwitch (when switch is called)
+- canSwitch:boolean
+- cannotSwitch:void
+- didSwitch (after switching has been initiated)
+
+- willActivate
+- canActivate:boolean
+- cannotActivate:void
+- didActivate
+
+- deactivate (extend)
+- deactivated (extend)
+
+You can set the `Route` constructor "class" on the Router via `router._RouteClass = MyRoute`
+This allows you to esily create a custom `Route` class where you extend the base `Route` and have the router use this custom class whenever you add a route via `addRoute` or `addRoutes`. Splendid!
+
+TODO: We need a mixin for this, so we can reuse the same logic for Route and Router :)
+
+### Authenticating and Authorizing routes
+
+The route methods `canActivate:boolean` and `canSwitch:boolean` can be used to guard the route from activation and/or switching (redirect). Add any auth logic you like here.
+You can also centralize the logic at a higher level, such as a parent route or root route or even on the router using the same methods.
 
 ## Links ##
 

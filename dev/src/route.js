@@ -55,7 +55,7 @@
           return signal && signal.getNumListeners() > 0;
         },
 
-        isSignalDelegate: function(delegate) {
+        _isSignalDelegate: function(delegate) {
           if (!delegate)
             return false;
 
@@ -64,15 +64,15 @@
         },
 
         _delegateSignal: function(signalName, delegate, args) {
-          if (_isActiveDelegate(delegate)) {
+          if (_isSignalDelegate(delegate)) {
             delegate._defaultSignalStrategy(signalName, args);
             return true;
           }
           return false;
         },
 
-        _defaultSignalStrategy : function(signalName) {
-          var args = [].slice.call(arguments, 1)
+        _defaultSignalStrategy : function(signalName, request) {
+          var args = this._defaultSignalArgs(request)
           if (_hasActiveSignal(this[signalName])) {
             this[switchName](args);
             return true;
@@ -82,6 +82,13 @@
           } else {
             _delegateSignal(signalName, this._router, args);
           }
+        },
+
+        _defaultSignalArgs: function(request) {
+          var arg = {route: route};
+          if (request)
+            arg[request] = request;
+          return arg
         },
 
         willSwitch : function(request) {
@@ -99,10 +106,10 @@
 
         doSwitch: function(request) {
           this.switched.dispatch(request);
-          this.wasSwitched();
+          this.didSwitch();
         },
 
-        wasSwitched: function(request) {
+        didSwitch: function(request) {
           this._defaultSignalStrategy('wasSwitched', request)
         },
 
@@ -120,10 +127,10 @@
 
         doActivate : function(request) {
           this.active = true;
-          this._wasActivated(request);
+          this.didActivate(request);
         },
 
-        _wasActivated: function(request) {
+        didActivate: function(request) {
           this._defaultSignalStrategy('wasActivated', request)
         },
 
@@ -139,10 +146,10 @@
 
         // TODO: signal
         deactivate : function() {
-          this._deactivated();
+          this.deactivated();
         },
 
-        _deactivated : function() {
+        deactivated : function() {
           this.active = false;
           this._defaultSignalStrategy('wasDeactivated', this)
         },

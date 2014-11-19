@@ -12,6 +12,7 @@
         this.parsingError = new signals.Signal();
         this._name = name || 'crossroads router';
         this._routes = [];
+        this._RouteClass = Route;
         this._prevRoutes = [];
         this._piped = [];
         this.resetState();
@@ -59,7 +60,7 @@
             //   throw Error "Route constructor requires a callback function"
             // }
 
-            var route = new Route(pattern, callback, priority, this);
+            var route = new RouteClass(pattern, callback, priority, this);
             this._sortedInsert(route);
             return route;
         },
