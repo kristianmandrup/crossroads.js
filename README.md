@@ -21,11 +21,37 @@ See [project page](http://millermedeiros.github.com/crossroads.js/) for document
 
 This fork offers the following extra features:
 
-TODO!!!
-
 ### Route nesting
 
-TODO!!!
+The Goal is to use the Composite pattern. Both Router and Roue are Composites, since a Route
+can have nested routes mounted. A router can pipe to another route if no routes were activated
+on that router.
+
+### Adding or mounting multiple routes
+
+The method `addRoutes` has been added to both the Router and the Route, to allow for an array of routes to be added or even adding/attaching/mounting all the routes of a Router.
+
+### Routes information
+
+`getRoutesBy` can be used to retrieve information about the routes registered on a given Router or Route. Example: `router.getRoutesBy('pattern', 'priority')`.
+
+You can also have this info displayed as a string by chaining a `display()` call: `router.getRoutesBy().display()`
+
+`parentRoute()` will get the parent route of a mounted/nested route. `getRoutes()` will get all the routes of a Router or all the child routes mounted on a Route. Note: It does not return all the routes in the nested sub-tree.
+
+### Custom request transformations
+
+The Router contains a method `_buildRequest(request)` which is called by `parse` to allow you to transform the request before parsing it. This can be useful if you want to allow the Router to
+be routed from other data providers than the URL. An example could be to route using some user settings or some incoming data that affects what the user should see etc.
+
+If you have a collaborative/multiuser app, a particular user might be able to control what other users will see, and that even/action could be fed into the router. Your imagination is the only limit ;)
+
+### Pending activation
+
+When a route has been successfully activated it can return a status indicating it is performing a "long-running operation". If this is the case the Router will call `handlePendingActivation(route)`.
+You can override this function to provide custom handling of some sort, such as showing a loading status, progress bar etc.
+
+To determine if the activation is pending, you can override the `_isPending(activateResult)` function on the router (by default it currently always returns false).
 
 ### Signals
 

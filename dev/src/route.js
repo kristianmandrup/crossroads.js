@@ -15,11 +15,6 @@
         this._matchRegexp = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase);
         this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
 
-        this.matched = new signals.Signal();
-        this.switched = new signals.Signal();
-
-        this.couldntSwitch = new signals.Signal();
-        this.couldntActivate = new signals.Signal();
 
         if (callback) {
             if (typeof callback !== 'function') {
@@ -36,6 +31,47 @@
         greedy : false,
 
         rules : void(0),
+
+        createSignal: function() {
+          return new signals.Signal();
+        },
+
+        configure: function() {
+          this.matched = this.createSignal();;
+          this.switched = this.createSignal();
+
+          this.couldntSwitch = this.createSignal();
+          this.couldntActivate = this.createSignal();
+          this.routeWasAdded = this.createSignal();
+        }
+
+        // TODO: put in base class or mixin (Composite pattern)
+        getRoutes : function () {
+            return this._routes;
+        },
+
+        // TODO: put in base class or mixin (Composite pattern)
+        getRoutesBy : function (properties) {
+            properties = properties || ['pattern', 'priority', 'greedy', 'paramsIds', 'optionalParamsIds'];
+            if (typeof properties == 'string') {
+              properties = [properties];
+            }
+            if (arguments.length > 1)
+              properties = [].slice.call(arguments);
+
+            var routes = this.getRoutes().map(function(route) {
+              var routeObj = {}
+              properties.forEach(function(prop) {
+                var propVal = route['_' + prop]
+                if (!!propVal && !(propVal instanceof Array && propVal.length === 0))
+                  routeObj[prop] = propVal;
+              })
+              return routeObj;
+            });
+
+            return routes;
+        },
+
 
         match : function (request) {
             request = request || '';
@@ -95,13 +131,13 @@
         },
 
         canSwitch: function(request) {
-          this._defaultSignalStrategy('couldSwitch', request)
+          this._defaultSignalStrategy('couldSwitch', request);
           return true;
         },
 
         // triggered when not permitted to switch
         cannotSwitch: function(request) {
-          this._defaultSignalStrategy('couldntSwitch', request)
+          this._defaultSignalStrategy('couldntSwitch', request);
         },
 
         doSwitch: function(request) {
@@ -110,15 +146,15 @@
         },
 
         didSwitch: function(request) {
-          this._defaultSignalStrategy('wasSwitched', request)
+          this._defaultSignalStrategy('wasSwitched', request);
         },
 
         activate : function(request) {
           this.willActivate(request);
           if (this.canActivate(request)) {
-            this.doActivate(request);
+            return this.doActivate(request);
           } else {
-            this.cannotActivate(request)
+            return this.cannotActivate(request)
           }
         },
 
@@ -131,17 +167,17 @@
         },
 
         didActivate: function(request) {
-          this._defaultSignalStrategy('wasActivated', request)
+          this._defaultSignalStrategy('wasActivated', request);
         },
 
         canActivate: function(request) {
-          this._defaultSignalStrategy('couldActivate', request)
+          this._defaultSignalStrategy('couldActivate', request);
           return true;
         },
 
         // triggered when not permitted to activate
         cannotActivate: function(request) {
-          this._defaultSignalStrategy('couldntActivate', request)
+          this._defaultSignalStrategy('couldntActivate', request);
         },
 
         // TODO: signal
@@ -151,7 +187,7 @@
 
         deactivated : function() {
           this.active = false;
-          this._defaultSignalStrategy('wasDeactivated', this)
+          this._defaultSignalStrategy('wasDeactivated', this);
         },
 
         _validateParams : function (request) {
@@ -311,8 +347,8 @@
             return routes;
         },
 
-        childRoutes: function() {
-            return this._children || [];
+        getRoutes: function() {
+            return this._routes || [];
         },
 
         parentRoute: function() {
@@ -349,14 +385,22 @@
 
             route = this._router.addRoute(basePattern + pattern, handler, priority);
             route._parent = this;
-            this._children = this._children || [];
-            this._children.push(route);
+            this.routes = this._routes || [];
+            this._routes.push(route);
 
             // index routes should be matched together with parent route
             if (!pattern.length || pattern === '/')
                 route.greedy = true;
 
+            this.routeAdded(route);
             return route;
+        },
+
+        // here you can do some extra stuff
+        // You could f.ex always mount a loading route on the route...
+        // or whatever you please
+        routeAdded: : function(route) {
+          this.routeWasAdded.dispatch(route);
         },
 
         _selfAndAncestors : function() {

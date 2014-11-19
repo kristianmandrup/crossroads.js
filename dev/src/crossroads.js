@@ -51,7 +51,6 @@
             var pattern = route_or_pattern;
             var callback = options_or_handler;
             if (options_or_handler && typeof options_or_handler == 'object') {
-              console.log('options_or_handler', options_or_handler);
               callback = options_or_handler.handler;
               priority =  options_or_handler.priority;
             }
@@ -130,8 +129,13 @@
         },
 
 
-        parse : function (request, defaultArgs) {
+        _buildRequest: function(request) {
           request = request || '';
+          return request;
+        },
+
+        parse : function (request, defaultArgs) {
+          request = this._buildRequest(request || '');
           defaultArgs = defaultArgs || [];
           try {
             return this._attemptParse(request, defaultArgs);
@@ -269,7 +273,11 @@
                     }
 
                     route.active = true;
-                    route.activate(request);
+                    var activateResult = route.activate(request);
+                    if (this._isPending(activateResult)) {
+                      this.handlePendingActivation(route, activateResult);
+                    }
+
                     res.push({
                         route : route,
                         params : params
@@ -282,6 +290,13 @@
             return true;
         },
 
+        _isPending: function (activateResult) {
+          return false;
+        },
+
+
+        handlePendingActivation : function(route, result) {
+        },
 
         pipe : function (otherRouter) {
             this._piped.push(otherRouter);
@@ -293,7 +308,7 @@
 
         // TODO: Combine with getRoutesBy().display()
         toString : function () {
-            return '[crossroads numRoutes:'+ this.getNumRoutes() +']';
+            return 'number of routes:'+ this.getNumRoutes();
         },
 
         // override to customize where/how errors are logged
