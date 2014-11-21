@@ -10,10 +10,6 @@ if (Signal) {
 }
 
 var SignalHelper = {
-  createSignal: function() {
-    return new signals.Signal();
-  },
-
   _isSignalDelegate: function(delegate) {
     if (!delegate)
       return false;

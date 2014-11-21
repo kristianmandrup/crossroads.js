@@ -1,6 +1,6 @@
 module.exports = RouterPiper;
 
-// _pipeParse(request, defaultArgs), pipe(otherRouter), unpipe(otherRouter)
+// _pipeParse(request, defaultArgs), pipe(otherRouter), unpipe(otherRouter), getPipedRouters()
 
 var RouterPiper = {
   _pipeParse : function(request, defaultArgs) {

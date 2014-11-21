@@ -1,5 +1,12 @@
 module.exports = PatternLexer;
 
+// precompileTokens(), captureVals(regex, pattern), getParamIds(pattern), getOptionalParamsIds(pattern)
+// compilePattern(pattern, ignoreCase, matchHead), replaceTokens(pattern, regexpName, replaceName)
+// getParamValues(request, regexp, shouldTypecast), interpolate(pattern, replacements)
+
+// API
+// strict(), loose(), legacy(), getParamIds(), getOptionalParamsIds(), getParamValues(), compilePattern(), interpolate()
+
 PatternLexer = (function () {
 
     var

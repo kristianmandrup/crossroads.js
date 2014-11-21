@@ -1,4 +1,4 @@
-module.exports = Signals;
+module.exports = SignalsAware;
 
 // _configureSignals()
 
@@ -9,8 +9,12 @@ var SignalsAware = {
       }
 
       for (signal in this._signals) {
-        this[signal] = this.createSignal();
+        this[signal] = this._createSignal();
       }
+  },
+
+  _createSignal: function() {
+    return new signals.Signal();
   }
 };
 

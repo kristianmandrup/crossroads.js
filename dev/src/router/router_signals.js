@@ -1,5 +1,7 @@
 module.exports = RouterSignals;
 
+// var RouterSignalsStrategy(signalName)
+
 var Signals = require('../signal')
 
 var RouterSignals = Xtender.extend(Signals, RouterSignalsStrategy);

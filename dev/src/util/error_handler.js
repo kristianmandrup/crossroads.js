@@ -1,5 +1,7 @@
 module.exports = ErrorHandler;
 
+// _logError(msg, error)
+
 var ErrorHandler = {
   _errorOutput: console.error,
 

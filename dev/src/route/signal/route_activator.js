@@ -2,7 +2,7 @@ module.exports = RouteActivator;
 
 // activate(request), willActivate(request), doActivate(request), didActivate(request)
 // canActivate(request), cannotActivate(request)
-// deactivate(), deactivate()
+// deactivate(), deactivated()
 
 // Signals: couldActivate, couldntActivate, wasActivated, wasDeactivated
 
