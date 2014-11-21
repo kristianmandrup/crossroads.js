@@ -1,5 +1,5 @@
 var router               = require('./router'),
-    utils                = require('./util');
+    util                 = require('./util');
     ErrorHandler         = util.ErrorHandler;
     PatternLexer         = util.PatternLexer;
 
@@ -11,9 +11,18 @@ var RouteComposer       = router.RouteComposer,
 
 var Xtender = utils.Xtender;
 
+var route       = require('./route'),
+    routable    = require('./routable'),
+    signal      = require('./signal');
+
 module.exports = {
     crossroads: crossroads,
-    Crossroads: Crossroads
+    Crossroads: Crossroads,
+    router:     router,
+    route:      route,
+    util:       util,
+    signal:     signal,
+    routable:   routable
 };
 
 var FullRouter = Xtender.extend(RouteComposer, RequestParser, RouteMatcher, RouterPiper, RouterSignals);
@@ -30,8 +39,8 @@ function Crossroads(name) {
     this._name = name || 'crossroads router';
     this._routes = [];
 
-    this._RouteClass = Route;
-    this._RouterClass = Crossroads,
+    this._RouteClass    = route.Route;
+    this._RouterClass   = Crossroads;
 
     this._prevRoutes = [];
     this._piped = [];

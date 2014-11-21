@@ -32,6 +32,15 @@ Router and Route have been split up into several small grouped API objects, to b
 The idea is to not force you in to having to use all the "bells & whistles", but instead allow
 you to compose your Router and Route APIs from composable blocks.
 
+### Build
+
+This project uses [webpack](https://github.com/webpack/webpack) as the package tool, in order to support:
+
+- CommonJS
+- RequireJS
+
+[Gulp](http://gulpjs.com/) used to build the distribution file in `dist/crossroads.js`
+
 ### Prototype design
 
 Base functionality for Router and Route is defined in `BaseRoute`

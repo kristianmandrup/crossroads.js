@@ -8,8 +8,8 @@ webpack({
   entry: "./crossroads",
   output: {
     path: __dirname + "/dist",
-    filename: "bundle.js"
+    filename: "crossroads.js"
   }
 }, function(err, stats) {
-  // ...
+  console.log('error', err);
 });
