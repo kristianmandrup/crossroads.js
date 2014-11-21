@@ -1,3 +1,5 @@
+module.exports = RouteSwitcher;
+
 var RouteSwitcher = {
   switch: function(request) {
     this.willSwitch(request);

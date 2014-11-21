@@ -1,3 +1,5 @@
+module.exports = RouteActivator;
+
 var RouteActivator = {
   activate : function(request) {
     this.willActivate(request);

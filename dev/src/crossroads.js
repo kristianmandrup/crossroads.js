@@ -1,3 +1,15 @@
+var router               = require('./router'),
+    utils                = require('./utils');
+
+var RouteComposer       = router.RouteComposer,
+    RequestParser       = router.RequestParser,
+    RouteMatcher        = router.RequestParser,
+    RouterPiper         = router.RouterPiper,
+    RouterSignals       = router.RouterSignals;
+
+var Xtender = utils.Xtender;
+
+module.exports = crossroads;
 
     // Crossroads --------
     //====================
@@ -61,8 +73,8 @@
 
     Crossroads.prototype.patternLexer = PatternLexer;
 
-    var FullRouter = Xtender.extend(RouteComposer, RequestParser, RouteMatcher, RouterPiper, RouterSignalsAble);
-    var Xtender.extend(Crossroads.prototype, FullRouter);
+    var FullRouter = Xtender.extend(RouteComposer, RequestParser, RouteMatcher, RouterPiper, RouterSignals);
+    Crossroads.prototype  = Xtender.extend(Crossroads.prototype, FullRouter);
 
     //"static" instance
     crossroads = new Crossroads();

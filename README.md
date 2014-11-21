@@ -29,7 +29,8 @@ Router and Route have been split up into several small grouped API objects, to b
 - `/signal` : Signal APIs and helpers
 - `/util` : Utility APIs
 
-The idea is to not force you in to having to use all the "bells & whistels", but instead allow you to compose your Router and Route APIs from composable blocks.
+The idea is to not force you in to having to use all the "bells & whistles", but instead allow
+you to compose your Router and Route APIs from composable blocks.
 
 ### Prototype design
 

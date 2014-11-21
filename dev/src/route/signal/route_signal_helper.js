@@ -1,3 +1,5 @@
+module.exports = RouteSignalHelper;
+
 var RouteSignalHelper = {
   _defaultSignalStrategy : function(signalName, request) {
     var args = this._defaultSignalArgs(request)

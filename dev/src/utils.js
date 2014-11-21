@@ -1,14 +1,27 @@
-
     var crossroads,
         _hasOptionalGroupBug,
         UNDEF;
 
     // Helpers -----------
     //====================
-
     var Xtender = {
-      extend: require("xtend")
+        extend: require("xtend")
     };
+
+    module.exports = {
+        arrayIndexOf: arrayIndexOf,
+        arrayRemove: arrayRemove,
+        isKind: isKind,
+        isRegExp: isRegExp,
+        isArray: isArray,
+        isFunction: isFunction,
+        typecastValue: typecastValue,
+        typecastArrayValues: typecastArrayValues,
+        decodeQueryString: decodeQueryString,
+        Xtender: Xtender
+    }
+
+
 
     if (!Object.create) {
       Object.create = function(proto) {

@@ -1,3 +1,5 @@
+module.exports = RouteSignalsAble;
+
 var RouteSignals = {
   _signals: ['matched', 'switched', 'couldntSwitch', 'couldntActivate', 'routeWasAdded'],
 
@@ -16,4 +18,9 @@ var RouteSignals = {
   }
 }
 
+var RouteSignalHelper = require('./route_signal_helper');
+var SignalsAble       = require('../../signal').SignalsAble;
+
 var RouteSignalsAble = Xtender.extend(RouteSignals, RouteSignalHelper, SignalsAble);
+
+
