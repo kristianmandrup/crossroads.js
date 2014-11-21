@@ -7,7 +7,7 @@
 
 ## Introduction ##
 
-Crossroads.js is a routing library inspired by URL Route/Dispatch utilities present on frameworks like Rails, Pyramid, Django, CakePHP, CodeIgniter, etc...
+*Crossroads.js* is a routing library inspired by URL Route/Dispatch utilities present on frameworks like Rails, Pyramid, Django, CakePHP, CodeIgniter, etc...
 It parses a string input and decides which action should be executed by matching the string against multiple patterns.
 
 If used properly it can reduce code complexity by decoupling objects and also by abstracting navigation paths.
@@ -30,7 +30,8 @@ Router and Route have been split up into several small grouped API objects, to b
 - `/util` : Utility APIs
 
 The idea is to not force you in to having to use all the "bells & whistles", but instead allow
-you to compose your Router and Route APIs from composable blocks.
+you to compose your Router and Route APIs from some "sane" building blocks.
+Feel free to come with ideas for improvements on the design.
 
 ### Build
 
@@ -45,8 +46,9 @@ Build:
 
 `gulp webpack`
 
-Will use `dev/src/crossroads.js` as the entry point and follow the require paths to create a bundled file which
-is output to `dist/crossroads.js`
+Will use `dev/src/crossroads.js` as the entry point and follow the `require` paths to create a dependency graph, which will be resolved in order
+ to find the best way to concatenate the files into one. Webpack then creates a bundled file which
+ is output to `dist/crossroads.js`
 
 ### Prototype design
 
@@ -55,12 +57,16 @@ Any Route/Router which can add routes to itself is a `CompositeRoute`.
 Here is an illustration of the basic Prototype (class) hierarchy.
 
 ```
-Route < BaseRoute
-Router < CompositeRoute < BaseRoute
+var MyNestedRoute < extend(Route, CompositeRoute, ChildRoute)
+
+var FullRouter = Xtender.extend(RouteComposer, RequestParser, RouteMatcher, RouterPiper, RouterSignals);
+Crossroads.prototype  = Xtender.extend(Crossroads.prototype, FullRouter, ErrorHandler);
 ```
 
 `Xtender.extend` is used to extend an Object (uses `xtend` by default).
 You can override this function to provide your own extension mechanism.
+
+Here an example of composing your own prototypes:
 
 ```js
 Xtender.extend(Route.prototype, BaseRoutable.prototype);
@@ -70,21 +76,14 @@ var RouteApi = {
   // Route specific methods...
 }
 
-Xtender.extend(CompositeRoutable.prototype, BaseRoutable.prototype);
-
-// ...
-
-Xtender.extend(Route.prototype, CompositeRoutable.prototype;
-
+Xtender.extend(CompositeRoute.prototype, BaseRoutable.prototype);
+Xtender.extend(Route.prototype, CompositeRoute.prototype;
 Xtender.extend(Router.prototype, RouterApi);
 
 var RouterApi = {
   // Route specific methods...
 }
 ```
-
-A `CompositeRoutable` can add any object which has `BaseRoutable` in its `prototype` path as a nested route.
-
 
 ### Route nesting
 
@@ -109,7 +108,8 @@ You can also have this info displayed as a string by chaining a `display()` call
 The Router contains a method `_buildRequest(request)` which is called by `parse` to allow you to transform the request before parsing it. This can be useful if you want to allow the Router to
 be routed from other data providers than the URL. An example could be to route using some user settings or some incoming data that affects what the user should see etc.
 
-If you have a collaborative/multiuser app, a particular user might be able to control what other users will see, and that even/action could be fed into the router. Your imagination is the only limit ;)
+If you have a collaborative app, a particular user might be able to control what other users will see, and that even/action could be fed into the router.
+Your imagination is the only limit ;)
 
 ### Pending activation
 
@@ -173,12 +173,14 @@ Methods you can override for custom functionality:
 You can set the `Route` constructor "class" on the Router via `router._RouteClass = MyRoute`
 This allows you to esily create a custom `Route` class where you extend the base `Route` and have the router use this custom class whenever you add a route via `addRoute` or `addRoutes`. Splendid!
 
-TODO: We need a mixin for this, so we can reuse the same logic for Route and Router :)
-
 ### Authenticating and Authorizing routes
 
 The route methods `canActivate:boolean` and `canSwitch:boolean` can be used to guard the route from activation and/or switching (redirect). Add any auth logic you like here.
 You can also centralize the logic at a higher level, such as a parent route or root route or even on the router using the same methods.
+Use the `_defaultSignalStrategy` for this.
+
+You might consider using [permit-authorize](https://github.com/kristianmandrup/permit-authorize) to provide the Authorization logic (guards) for your routes. We recommend using
+either a centralized approach (routes delegating to the router) or a decorator approach (decorating routes with individual auth logic).
 
 ## Links ##
 
@@ -186,13 +188,12 @@ You can also centralize the logic at a higher level, such as a parent route or r
  - [Usage examples](https://github.com/millermedeiros/crossroads.js/wiki/Examples)
  - [Changelog](https://github.com/millermedeiros/crossroads.js/blob/master/CHANGELOG.md)
 
-
-
 ## Dependencies ##
 
 **This library requires [JS-Signals](http://millermedeiros.github.com/js-signals/) to work.**
 
-
+However it has been now been re-designed to make it super easy to decouple it from JS-Signals, to provide your own
+messaging mechanism.
 
 ## License ##
 
