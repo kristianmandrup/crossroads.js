@@ -35,11 +35,31 @@ function purgeDeploy(){
 function build(){
     var wrapper = readFile(SRC_DIR + '/wrapper.js'),
         deploy = tmpl(wrapper, {
+            // TODO: refactor this!! Use build tool like gulp or gobble
+            // Perhaps use node RequireJS and dist via WebPack to simplify file dependencies ;)
             LICENSE       : readFile(SRC_DIR + '/license.txt'),
             INTRO_JS      : readFile(SRC_DIR + '/intro.js'),
             CROSSROADS_JS : readFile(SRC_DIR + '/crossroads.js'),
             ROUTE_JS      : readFile(SRC_DIR + '/route.js'),
-            LEXER_JS      : readFile(SRC_DIR + '/pattern_lexer.js')
+            LEXER_JS      : readFile(SRC_DIR + '/util/pattern_lexer.js'),
+
+            SIGNAL_HELPER   : readFile(SRC_DIR + '/signal/signal_helper.js'),
+            SIGNAL_AWARE    : readFile(SRC_DIR + '/signal/signal_aware.js'),
+
+            REQUEST_PARSER  : readFile(SRC_DIR + '/router/request_parser.js'),
+            ROUTE_COMPOSER  : readFile(SRC_DIR + '/router/route_composer.js'),
+            ROUTE_MATCHER   : readFile(SRC_DIR + '/router/route_matcher.js'),
+            ROUTER_PIPER    : readFile(SRC_DIR + '/router/router_piper.js'),
+            ROUTER_SIGNALS  : readFile(SRC_DIR + '/router/router_signals.js'),
+
+            ROUTE_REQUEST_PARSER    : readFile(SRC_DIR + '/router/route_request_parser.js'),
+            ROUTE_VALIDATION        : readFile(SRC_DIR + '/router/route_validation.js'),
+
+            ROUTE_ACTIVATOR         : readFile(SRC_DIR + '/router/signal/route_activator.js'),
+            ROUTE_SWITCHER          : readFile(SRC_DIR + '/router/signal/route_switcher.js'),
+            ROUTE_SIGNAL_HELPER     : readFile(SRC_DIR + '/router/signal/route_signal_helper.js'),
+            ROUTE_SIGNALS           : readFile(SRC_DIR + '/router/signal/route_signals.js'),
+
         }, /\/\/::(\w+)::\/\//g);
 
     _fs.writeFileSync(DIST_PATH, tmpl(deploy, _replacements), FILE_ENCODING);

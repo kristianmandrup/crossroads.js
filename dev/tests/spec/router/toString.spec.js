@@ -1,12 +1,12 @@
 /*jshint onevar:false */
 
 //for node
-var crossroads = crossroads || require('../../../dist/crossroads');
+var crossroads = crossroads || require('../../../../../dist/crossroads');
 //end node
 
 
 
-describe('crossroads.toString() and route.toString()', function(){
+describe('crossroads.toString()', function(){
 
     afterEach(function(){
         crossroads.resetState();
@@ -22,7 +22,6 @@ describe('crossroads.toString() and route.toString()', function(){
             expect(null).toEqual('fail: not a trigger test');
         });
         expect( crossroads.toString() ).toBe( '[crossroads numRoutes:1]' );
-        expect( a.toString() ).toBe( '[Route pattern:"/{foo}_{bar}", numListeners:1]' );
     });
 
 

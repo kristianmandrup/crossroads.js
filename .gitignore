@@ -5,6 +5,7 @@ design/
 node_modules/
 testacular.conf.js
 
+.idea
 .DS_Store?
 ehthumbs.db
 Icon?

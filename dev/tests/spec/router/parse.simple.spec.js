@@ -1,4 +1,5 @@
-var crossroads = crossroads || require('../../../dist/crossroads');
+/*jshint onevar:false */
+var crossroads = crossroads || require('../../../../../dist/crossroads');
 //end node
 
 

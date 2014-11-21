@@ -1,12 +1,12 @@
 /*jshint onevar:false */
 
 //for node
-var crossroads = crossroads || require('../../../dist/crossroads');
+var crossroads = crossroads || require('../../../../../dist/crossroads');
 //end node
 
 
 
-describe('crossroads.toString() and route.toString()', function(){
+describe('Remove routes', function(){
 
     beforeEach(function(){
         crossroads.resetState();

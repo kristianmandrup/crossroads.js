@@ -1,11 +1,11 @@
 /*jshint onevar:false */
 
 //for node
-var crossroads = crossroads || require('../../../dist/crossroads');
+var crossroads = crossroads || require('../../../../../dist/crossroads');
 //end node
 
 
-describe('Match', function(){
+describe('Route Match', function(){
 
     var _prevTypecast;
     var _prevCase;
