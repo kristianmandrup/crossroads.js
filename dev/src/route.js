@@ -1,12 +1,23 @@
-// Route --------------
-//=====================
+var utils = require('./utils');
+var route = require('./route');
+
+var Xtender = utils.Xtender;
 
 Route.prototype = BaseRoutable.prototype;
 
-Xtender.extend(Route.prototype, RouteApi);
+Route.prototype = Xtender.extend(Route.prototype, RouteApi, route.RouteRequestParser, route.RouteValidation);
 
-var FullRoute = Xtender.extend(RouteActivator, RouteSwitcher, RouteRequestParser, RouteValidation, RouteSignalsAble);
-var Xtender.extend(Route.prototype, FullRouter);
+var SignalRoute = Xtender.extend(
+  Route.prototype,
+  route.RouteActivator,
+  route.RouteSwitcher,
+  route.RouteSignals
+);
+
+module.exports = {
+  SignalRoute: SignalRoute,
+  Route: Route
+}
 
 /**
  * @constructor

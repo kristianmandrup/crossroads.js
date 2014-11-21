@@ -1,34 +1,12 @@
-var CompositeRoutable = function() {
-}
+module.exports = CompositeRoute;
 
-CompositeRoutable.prototype = {
-  // TODO: put in base class or mixin (Composite pattern)
-  getRoutes : function () {
-      return this._routes;
-  },
+var Xtender = require('../utils').Xtender;
 
-  // TODO: put in base class or mixin (Composite pattern)
-  getRoutesBy : function (properties) {
-      properties = properties || ['pattern', 'priority', 'greedy', 'paramsIds', 'optionalParamsIds'];
-      if (typeof properties == 'string') {
-        properties = [properties];
-      }
-      if (arguments.length > 1)
-        properties = [].slice.call(arguments);
+var RouteContainer = require('../routable/route_container');
 
-      var routes = this.getRoutes().map(function(route) {
-        var routeObj = {}
-        properties.forEach(function(prop) {
-          var propVal = route['_' + prop]
-          if (!!propVal && !(propVal instanceof Array && propVal.length === 0))
-            routeObj[prop] = propVal;
-        })
-        return routeObj;
-      });
+var CompositeRoute = Xtender.extend(RouteContainer, CompRoute);
 
-      return routes;
-  },
-
+var CompRoute = {
   // can be used to add all routes of a Router or an Array of routes
   // Note: Routes can be transformed before being added!
   addRoutes : function (routable, transformer, options) {
@@ -41,17 +19,13 @@ CompositeRoutable.prototype = {
       if (routable instanceof Array || arrayLike) {
         routes = routable;
       }
-      routes = if typeof transformer == 'function' ? transformer(routes) : routes;
+      routes = typeof transformer == 'function' ? transformer(routes) : routes;
 
       routes.forEach(function(route) {
         var clonedRoute = Object.create(route);
         self.addRoute(clonedRoute);
       });
       return routes;
-  },
-
-  getRoutes: function() {
-      return this._routes || [];
   },
 
   // For nested route only?
@@ -99,16 +73,9 @@ CompositeRoutable.prototype = {
   // here you can do some extra stuff
   // You could f.ex always mount a loading route on the route...
   // or whatever you please
-  routeAdded: : function(route) {
-    this.routeWasAdded.dispatch(route);
-  },
-
-  _selfAndAncestors : function() {
-      var parent = this;
-      var collect = [this];
-      while (parent = parent._parent) {
-          collect.push(parent);
-      }
-      return collect;
+  routeAdded:  function(route) {
+    if (this.routeWasAdded) {
+      this.routeWasAdded.dispatch(route);
+    }
   }
 }

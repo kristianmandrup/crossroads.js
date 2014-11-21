@@ -1,3 +1,5 @@
+module.exports = RouteMatcher;
+
 var RouteMatcher = {
   _getMatchedRoutes : function (request) {
       var res = [],
@@ -71,6 +73,15 @@ var RouteMatcher = {
           return false;
       }
       return true;
+  },
+
+  _selfAndAncestors : function() {
+    var parent = this;
+    var collect = [this];
+    while (parent = parent._parent) {
+      collect.push(parent);
+    }
+    return collect;
   },
 
   _isPending: function (activateResult) {

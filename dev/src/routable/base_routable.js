@@ -1,9 +1,7 @@
 var BaseRoutable = function() {
-
 }
 
 BaseRoutable.prototype = {
-
 }
 
 var ChildRoute = {
