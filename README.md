@@ -41,6 +41,13 @@ This project uses [webpack](https://github.com/webpack/webpack) as the package t
 
 [Gulp](http://gulpjs.com/) used to build the distribution file in `dist/crossroads.js`
 
+Build:
+
+`gulp webpack`
+
+Will use `dev/src/crossroads.js` as the entry point and follow the require paths to create a bundled file which
+is output to `dist/crossroads.js`
+
 ### Prototype design
 
 Base functionality for Router and Route is defined in `BaseRoute`

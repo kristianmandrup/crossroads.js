@@ -105,7 +105,6 @@ var RouteApi = {
       if (properties.length === 0) {
         properties = ['name', 'pattern', 'priority', 'matchListeners'];
       }
-      var self = this;
       return properties.map(function(prop) {
         var val = this['_' + prop];
         return val ? (prop + ': ' + val) : '';

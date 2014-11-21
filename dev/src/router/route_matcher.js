@@ -92,9 +92,13 @@ var RouteMatcher = {
   },
 
   _isPending: function (activateResult) {
+    if (typeof activateResult === 'object') {
+      return activateResult.pending ? true : false;
+    }
     return false;
   },
 
   handlePendingActivation : function(route, result) {
+    console.log('Pending route activation:', route.name, result);
   }
 }

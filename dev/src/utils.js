@@ -1,5 +1,4 @@
-var crossroads,
-    UNDEF;
+var UNDEF;
 
 // Helpers -----------
 //====================

@@ -27,7 +27,11 @@
     },
     "devDependencies" : {
         "uglify-js" : "~1.2.3",
-        "jasmine-node" : "~1.4.x"
+        "jasmine-node" : "~1.4.x",
+        "gulp" : "x",
+        "gulp-webpack": "x",
+        "webpack": "x",
+        "xtend" : "x"
     },
     "scripts" : {
         "pretest" : "node build",
