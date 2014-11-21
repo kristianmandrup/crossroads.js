@@ -1,9 +1,16 @@
-module.exports = RouteSignalsAble;
+module.exports = RouteSignals;
 
-var RouteSignals = {
-  _signals: ['matched', 'switched', 'couldntSwitch', 'couldntActivate', 'routeWasAdded'],
+var RouteSignalHelper = require('./route_signal_helper');
+var SignalsAble       = require('../../signal').SignalsAble;
 
-  configureSignals: function(callback) {
+var RouteSignals = Xtender.extend(RouteSignalsContainer, RouteSignalHelper, SignalsAble);
+
+// _configureSignals(callback)
+
+var RouteSignalsContainer = {
+  _signals: ['matched', 'switched', 'couldntSwitch', 'couldntActivate'],
+
+  _configureSignals: function(callback) {
     for (signal in this._signals) {
       this[signal] = this.createSignal();
     }
@@ -16,11 +23,7 @@ var RouteSignals = {
         this._handler = callback;
     }
   }
-}
+};
 
-var RouteSignalHelper = require('./route_signal_helper');
-var SignalsAble       = require('../../signal').SignalsAble;
-
-var RouteSignalsAble = Xtender.extend(RouteSignals, RouteSignalHelper, SignalsAble);
 
 

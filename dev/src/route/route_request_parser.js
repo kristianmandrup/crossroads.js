@@ -1,3 +1,14 @@
+module.exports = RouteRequestParser;
+
+// _getParamsObject(request), _getParamsArray(request)
+
+var util = require('../utils');
+
+// IE 7-8 capture optional groups as empty strings while other browsers
+// capture as `undefined`
+var _hasOptionalGroupBug = (/t(.+)?/).exec('t')[1] === '';
+
+
 var RouteRequestParser = {
     _getParamsObject : function (request) {
         var shouldTypecast = this._router.shouldTypecast,
@@ -15,13 +26,13 @@ var RouteRequestParser = {
                     o[param +'_'] = val;
                     //update vals_ array as well since it will be used
                     //during dispatch
-                    val = decodeQueryString(val, shouldTypecast);
+                    val = util.decodeQueryString(val, shouldTypecast);
                     values[n] = val;
                 }
                 // IE will capture optional groups as empty strings while other
                 // browsers will capture `undefined` so normalize behavior.
                 // see: #gh-58, #gh-59, #gh-60
-                if ( _hasOptionalGroupBug && val === '' && arrayIndexOf(this._optionalParamsIds, param) !== -1 ) {
+                if ( _hasOptionalGroupBug && val === '' && util.arrayIndexOf(this._optionalParamsIds, param) !== -1 ) {
                     val = void(0);
                     values[n] = val;
                 }
@@ -30,7 +41,7 @@ var RouteRequestParser = {
             //alias to paths and for RegExp pattern
             o[n] = val;
         }
-        o.request_ = shouldTypecast? typecastValue(request) : request;
+        o.request_ = shouldTypecast? util.typecastValue(request) : request;
         o.vals_ = values;
         return o;
     },

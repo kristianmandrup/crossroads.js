@@ -1,3 +1,9 @@
+module.exports = RouteValidation;
+
+// _validateParams(request), _isValidParam(request, prop, values), _isValidArrayRule(arr, val),
+
+var util = require('../utils');
+
 var RouteValidation = {
   _validateParams : function (request) {
       var rules = this.rules,
@@ -18,7 +24,7 @@ var RouteValidation = {
           isValid = false,
           isQuery = (prop.indexOf('?') === 0);
 
-      if (val == null && this._optionalParamsIds && arrayIndexOf(this._optionalParamsIds, prop) !== -1) {
+      if (val == null && this._optionalParamsIds && util.arrayIndexOf(this._optionalParamsIds, prop) !== -1) {
           isValid = true;
       }
       else if (isRegExp(validationRule)) {
@@ -42,7 +48,7 @@ var RouteValidation = {
 
   _isValidArrayRule : function (arr, val) {
       if (! this._router.ignoreCase) {
-          return arrayIndexOf(arr, val) !== -1;
+          return util.arrayIndexOf(arr, val) !== -1;
       }
 
       if (typeof val === 'string') {
@@ -62,4 +68,4 @@ var RouteValidation = {
       }
       return false;
   }
-}
+};

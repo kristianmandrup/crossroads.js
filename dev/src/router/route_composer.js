@@ -1,33 +1,7 @@
+module.exports = RouteComposer;
+
 var RouteComposer = {
-  getRoutes : function () {
-      return this._routes;
-  },
 
-  getRoutesBy : function (properties) {
-      properties = properties || ['pattern', 'priority', 'greedy', 'paramsIds', 'optionalParamsIds'];
-      if (typeof properties == 'string') {
-        properties = [properties];
-      }
-      if (arguments.length > 1)
-        properties = [].slice.call(arguments);
-
-      var routes = this.getRoutes().map(function(route) {
-        var routeObj = {}
-        properties.forEach(function(prop) {
-          var propVal = route['_' + prop]
-          if (!!propVal && !(propVal instanceof Array && propVal.length === 0))
-            routeObj[prop] = propVal;
-        })
-        return routeObj;
-      });
-
-      return routes;
-  },
-
-  getNumRoutes : function () {
-      return this.getRoutes().length;
-  },
-  
   addRoute : function (route_or_pattern, options_or_handler, priority) {
       var isRouteLike = typeof route_or_pattern == 'object' && route_or_pattern._pattern;
 
@@ -43,6 +17,7 @@ var RouteComposer = {
 
       var route = new RouteClass(pattern, callback, priority, this);
       this._sortedInsert(route);
+      this._routeAdded(route);
       return route;
   },
 
@@ -66,19 +41,6 @@ var RouteComposer = {
         self.addRoute(clonedRoute);
       });
       return routes;
-  },
-
-  removeRoute : function (route) {
-      arrayRemove(this._routes, route);
-      route._destroy();
-  },
-
-  removeAllRoutes : function () {
-      var n = this.getNumRoutes();
-      while (n--) {
-          this._routes[n]._destroy();
-      }
-      this._routes.length = 0;
   },
 
   _sortedInsert : function (route) {

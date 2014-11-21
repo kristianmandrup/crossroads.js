@@ -7,27 +7,6 @@ var RouteContainer = require('../routable/route_container');
 var CompositeRoute = Xtender.extend(RouteContainer, CompRoute);
 
 var CompRoute = {
-  // can be used to add all routes of a Router or an Array of routes
-  // Note: Routes can be transformed before being added!
-  addRoutes : function (routable, transformer, options) {
-      var self = this;
-      var routes = [];
-      if (typeof routable.getRoutes == 'function') {
-          routes = routable.getRoutes();
-      }
-      var arrayLike = typeof routable == 'object' && routable.length;
-      if (routable instanceof Array || arrayLike) {
-        routes = routable;
-      }
-      routes = typeof transformer == 'function' ? transformer(routes) : routes;
-
-      routes.forEach(function(route) {
-        var clonedRoute = Object.create(route);
-        self.addRoute(clonedRoute);
-      });
-      return routes;
-  },
-
   // For nested route only?
   addRoute : function (route_or_pattern, options_or_handler, priority) {
       var isRouteLike = typeof route_or_pattern == 'object' && route_or_pattern._pattern;
@@ -59,23 +38,13 @@ var CompRoute = {
 
       route = this._router.addRoute(basePattern + pattern, handler, priority);
       route._parent = this;
-      this.routes = this._routes || [];
       this._routes.push(route);
 
       // index routes should be matched together with parent route
       if (!pattern.length || pattern === '/')
           route.greedy = true;
 
-      this.routeAdded(route);
+      this._routeAdded(route);
       return route;
-  },
-
-  // here you can do some extra stuff
-  // You could f.ex always mount a loading route on the route...
-  // or whatever you please
-  routeAdded:  function(route) {
-    if (this.routeWasAdded) {
-      this.routeWasAdded.dispatch(route);
-    }
   }
-}
+};

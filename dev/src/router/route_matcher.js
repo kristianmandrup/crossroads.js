@@ -1,5 +1,15 @@
 module.exports = RouteMatcher;
 
+// _getMatchedRoutes(request), _matchRoute(request, res, route), _attemptMatchRoute(request, res, route)
+// _isPending(activateResult), handlePendingActivation(route, result)
+
+// depends on RequestParser
+
+var RequestParser = require('./request_parser');
+var Xtender = require('../utils').Xtender;
+
+RouteMatcher = Xtender.extend(RequestParser, RouteMatcher);
+
 var RouteMatcher = {
   _getMatchedRoutes : function (request) {
       var res = [],
@@ -69,10 +79,7 @@ var RouteMatcher = {
               });
           }
       }
-      if (!this.greedyEnabled && res.length) {
-          return false;
-      }
-      return true;
+      return (!this.greedyEnabled && res.length) ? false : true;
   },
 
   _selfAndAncestors : function() {
@@ -87,7 +94,6 @@ var RouteMatcher = {
   _isPending: function (activateResult) {
     return false;
   },
-
 
   handlePendingActivation : function(route, result) {
   }

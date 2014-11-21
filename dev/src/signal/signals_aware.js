@@ -1,9 +1,10 @@
-var SignalHelper = require('./signal_helper');
+module.exports = Signals;
+
+// _configureSignals()
 
 var SignalsAware = {
-
-  configureSignals: function() {
-      if (!(this._signals instanceof Array) {
+  _configureSignals: function() {
+      if (!(this._signals instanceof Array)) {
         throw Error('Any SignalsAware class should have an array of Signals in ._signals')
       }
 
@@ -11,6 +12,5 @@ var SignalsAware = {
         this[signal] = this.createSignal();
       }
   }
-}
+};
 
-var SignalsAble = Xtender.extend(SignalsAware, SignalHelper);

@@ -1,11 +1,20 @@
 var utils = require('./utils');
 var route = require('./route');
+var BaseRoutable = require('./routable/base_routable');
 
 var Xtender = utils.Xtender;
 
 Route.prototype = BaseRoutable.prototype;
 
 Route.prototype = Xtender.extend(Route.prototype, RouteApi, route.RouteRequestParser, route.RouteValidation);
+
+var NestedRoute  = Xtender.extend(Route.prototype, route.CompositeRoute, route.ChildRoute);
+var CompositeRoute  = Xtender.extend(Route.prototype, route.CompositeRoute);
+var ChildRoute  = Xtender.extend(Route.prototype, route.ChildRoute);
+
+function isRegExp(val) {
+  return isKind(val, 'RegExp');
+}
 
 var SignalRoute = Xtender.extend(
   Route.prototype,
@@ -16,8 +25,11 @@ var SignalRoute = Xtender.extend(
 
 module.exports = {
   SignalRoute: SignalRoute,
+  NestedRoute: NestedRoute,
+  CompositeRoute: CompositeRoute,
+  ChildRoute: ChildRoute,
   Route: Route
-}
+};
 
 /**
  * @constructor
@@ -31,7 +43,10 @@ function Route(pattern, callback, priority, router, name) {
     this._priority = priority || 0;
 
     this._lexPattern();
-    this.configureSignals(callback);
+
+    if (this._configureSignals) {
+      this._configureSignals(callback);
+    }
 }
 
 var RouteApi = {
@@ -42,7 +57,10 @@ var RouteApi = {
 
     _lexPattern: function() {
       var isRegexPattern = isRegExp(this._pattern),
-          patternLexer = router.patternLexer;
+          patternLexer = this._router.patternLexer,
+          pattern = this._pattern,
+          router = this.router;
+
 
       this._paramsIds = isRegexPattern? null : patternLexer.getParamIds(pattern);
       this._optionalParamsIds = isRegexPattern? null : patternLexer.getOptionalParamsIds(pattern);
@@ -66,7 +84,7 @@ var RouteApi = {
 
     _throwError: function(msg) {
       throw new Error(msg);
-    }
+    },
 
     dispose : function () {
         this._router.removeRoute(this);

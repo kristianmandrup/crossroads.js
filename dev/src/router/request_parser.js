@@ -1,3 +1,12 @@
+module.exports = RequestParser;
+
+// _buildRequest(request), parse(request, defaultArgs), _attemptParse(request, defaultArgs)
+// _switchPrevRoutes(request)
+
+// Signals: parsingError, bypassed
+
+// TODO: use general dispatch method
+
 var RequestParser = {
   _buildRequest: function(request) {
     request = request || '';
@@ -13,6 +22,7 @@ var RequestParser = {
     // if an error occurs during routing, we fire the routingError signal on this route
     catch (error) {
       this._logError('Parsing error', error);
+      // TODO: use general dispatch method
       this.parsingError.dispatch(this.parsingError, defaultArgs.concat([{request: request, error: error}]));
     }
   },
@@ -45,6 +55,7 @@ var RequestParser = {
           }
       } else {
           this._prevBypassedRequest = request;
+          // TODO: use general dispatch method
           this.bypassed.dispatch.apply(this.bypassed, defaultArgs.concat([request]));
       }
 
@@ -64,4 +75,4 @@ var RequestParser = {
           }
       }
   }
-}
+};

@@ -1,3 +1,8 @@
+module.exports = SignalHelper;
+
+// createSignal(), _isSignalDelegate(delegate), _delegateSignal(signalName, delegate, args)
+// _isActiveSignal(), _canDispatch(), _dispatch(signalName, ...)
+
 if (Signal) {
   Signal.prototype.isActive = function() {
     return this.active && this.getNumListeners() > 0;

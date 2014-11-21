@@ -1,5 +1,11 @@
+module.exports = RoutesList;
+
+// an extension to Array.prototype (array of routes) which adds a display function ;)
+// Usage:
+//  route.getRoutesBy('name', 'priority').display()
+
 // for iterating and displaying routes
-var RoutesList = function () {}
+var RoutesList = function () {};
 RoutesList.prototype = Array.prototype;
 RoutesList.prototype.display = function() {
   return this.map(function(routeInfo) {
@@ -7,4 +13,4 @@ RoutesList.prototype.display = function() {
       return key + ': ' + routeInfo[key];
     }).join(', ')
   }).join('\n')
-}
+};

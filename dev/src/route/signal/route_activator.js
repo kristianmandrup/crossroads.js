@@ -1,5 +1,11 @@
 module.exports = RouteActivator;
 
+// activate(request), willActivate(request), doActivate(request), didActivate(request)
+// canActivate(request), cannotActivate(request)
+// deactivate(), deactivate()
+
+// Signals: couldActivate, couldntActivate, wasActivated, wasDeactivated
+
 var RouteActivator = {
   activate : function(request) {
     this.willActivate(request);
@@ -32,7 +38,6 @@ var RouteActivator = {
     this._defaultSignalStrategy('couldntActivate', request);
   },
 
-  // TODO: signal
   deactivate : function() {
     this.deactivated();
   },

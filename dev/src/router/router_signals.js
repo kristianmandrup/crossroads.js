@@ -1,4 +1,10 @@
-var RouterSignals = {
+module.exports = RouterSignals;
+
+var Signals = require('../signal')
+
+var RouterSignals = Xtender.extend(Signals, RouterSignalsStrategy);
+
+var RouterSignalsStrategy = {
   _defaultSignalStrategy : function(signalName) {
     if (this[signalName]) {
       var args = [].slice.call(arguments, 1)
@@ -9,4 +15,4 @@ var RouterSignals = {
   }
 }
 
-var RouterSignalsAble = Xtender.extend(RouterSignals, SignalsAble);
+
