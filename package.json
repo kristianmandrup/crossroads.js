@@ -23,7 +23,8 @@
         }
     ],
     "dependencies" : {
-        "signals" : "<2.0"
+        "signals" : ">=1.0",
+        "clone" :   "~0.1"
     },
     "devDependencies" : {
         "uglify-js" : "~1.2.3",

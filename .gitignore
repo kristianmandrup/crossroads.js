@@ -4,7 +4,7 @@
 design/
 node_modules/
 testacular.conf.js
-
+npm-debug.log
 .idea
 .DS_Store?
 ehthumbs.db

@@ -29,10 +29,12 @@ RouteMatcher.prototype = {
     return this.isRegexPattern()? pattern : this.compilePattern(true);
   },
 
+  getPatternLexer: function() {
+    return this.route.patternLexer;
+  },
+
   compilePattern: function(matchHead) {
-    var patternLexer = this.getPatternLexer();
-    var pattern = this.getPattern();
-    patternLexer.compilePattern(pattern, this.router.ignoreCase, matchHead)
+    this.getPatternLexer().compilePattern(this.getPattern(), this.router.ignoreCase, matchHead)
   },
 
   match : function (request) {
@@ -41,16 +43,12 @@ RouteMatcher.prototype = {
     return this.getMatchRegexp().test(request) && this._validateParams(request);
   },
 
-  _lexPattern: function() {
-    var isRegexPattern = isRegExp(this._pattern),
-      patternLexer = this._router.patternLexer,
-      pattern = this._pattern,
-      router = this.router;
+  paramsIds: function() {
+    return this.isRegexPattern() ? null : this.getPatternLexer().getParamIds(this.getPattern());
+  },
 
-    this._paramsIds = isRegexPattern? null : patternLexer.getParamIds(pattern);
-    this._optionalParamsIds = isRegexPattern? null : patternLexer.getOptionalParamsIds(pattern);
-    this._matchRegexp = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase);
-    this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
+  optionalParamsIds: function() {
+    this.isRegexPattern ? null : this.getPatternLexer().getOptionalParamsIds(this.getPattern());
   },
 
   isRegexPattern: function() {
