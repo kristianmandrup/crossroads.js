@@ -12,10 +12,6 @@ var NestedRoute  = Xtender.extend(Route.prototype, route.CompositeRoute, route.C
 var CompositeRoute  = Xtender.extend(Route.prototype, route.CompositeRoute);
 var ChildRoute  = Xtender.extend(Route.prototype, route.ChildRoute);
 
-function isRegExp(val) {
-  return isKind(val, 'RegExp');
-}
-
 var SignalRoute = Xtender.extend(
   Route.prototype,
   route.RouteActivator,
@@ -30,6 +26,7 @@ module.exports = {
   ChildRoute: ChildRoute,
   Route: Route
 };
+
 
 /**
  * @constructor
@@ -68,11 +65,12 @@ var RouteApi = {
       this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
     },
 
-    match : function (request) {
-        request = request || '';
-        //validate params even if regexp because of `request_` rule.
-        return this._matchRegexp.test(request) && this._validateParams(request);
+    isRegexPattern: function() {
+      router = router || this._router;
+      isRegExp(this.getPattern(router))
     },
+
+
 
     interpolate : function(replacements) {
         var str = this._router.patternLexer.interpolate(this._pattern, replacements);

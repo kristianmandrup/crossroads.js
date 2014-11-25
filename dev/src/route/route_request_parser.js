@@ -8,11 +8,17 @@ var util = require('../utils');
 // capture as `undefined`
 var _hasOptionalGroupBug = (/t(.+)?/).exec('t')[1] === '';
 
+function RouteRequestParser(request) {
+    this.request = request;
+}
 
-var RouteRequestParser = {
-    _getParamsObject : function (request) {
-        var shouldTypecast = this._router.shouldTypecast,
-            values = this._router.patternLexer.getParamValues(request, this._matchRegexpHead, shouldTypecast),
+RouteRequestParser.prototype = {
+    _getParamsObject : function () {
+        var request = this.request;
+        var router = this.activeRouter;
+
+        var shouldTypecast = router.shouldTypecast,
+            values = router.patternLexer.getParamValues(request, this._matchRegexpHead, shouldTypecast),
             o = {},
             n = values.length,
             param, val;

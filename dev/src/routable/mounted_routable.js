@@ -10,6 +10,10 @@ var MountedRoutable = {
     }
   },
 
+  activeRouter: function() {
+    return this._activeRouter || this._router;
+  },
+
   // Routers mounted on this Routable
   getMountedRouters: function() {
     return this._mounted;

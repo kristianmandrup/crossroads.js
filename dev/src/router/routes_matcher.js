@@ -10,31 +10,41 @@ var Xtender = require('../utils').Xtender;
 
 RouteMatcher = Xtender.extend(RequestParser, RouteMatcher);
 
-var RouteMatcher = {
-  _getMatchedRoutes : function (request) {
-      var res = [],
-          routes = this._routes,
-          n = routes.length,
-          route;
+function RouteMatcher(request) {
+  this.request = request;
+}
 
-      while (route = routes[--n]) {
-          route.active = false;
-      }
+RouteMatcher.prototype = {
+  transaction: function(router, mainLoop) {
+    this.activeRouter = router;
+    mainLoop();
+    this.activeRouter = null;
+  },
 
-      //should be decrement loop since higher priorities are added at the end of array
-      n = routes.length;
-      while (route = routes[--n]) {
-          if (!this._matchRoute(request, res, route)) {
-            break;
-          }
-      }
-      return res;
+  _getMatchedRoutes : function () {
+    var res = [],
+        routes = this._routes,
+        n = routes.length,
+        route;
+
+    while (route = routes[--n]) {
+        route.active = false;
+    }
+
+    //should be decrement loop since higher priorities are added at the end of array
+    n = routes.length;
+    while (route = routes[--n]) {
+        if (!this._matchRoute(res, route)) {
+          break;
+        }
+    }
+    return res;
   },
 
 
-  _matchRoute : function (request, res, route) {
+  _matchRoute : function (res, route) {
     try {
-      return this._attemptMatchRoute(request, res, route);
+      return this._attemptMatchRoute(res, route);
     }
     // if an error occurs during routing, we fire the routingError signal on this route
     catch (error) {
@@ -54,32 +64,12 @@ var RouteMatcher = {
     }
   },
 
-  _attemptMatchRoute: function(request, res, route) {
-      if ((!res.length || this.greedy || route.greedy) && route.match(request)) {
-          var allParams = route._getParamsArray(request),
-              ancestors = route._selfAndAncestors();
-
-          var i = ancestors.length;
-          while (route = ancestors[--i]) {
-              var consume = route._getParamsArray(request, true).length;
-              var params = allParams.splice(0, consume);
-              if (route.active) {
-                  continue;
-              }
-
-              route.active = true;
-              var activateResult = route.activate(request);
-              if (this._isPending(activateResult)) {
-                this.handlePendingActivation(route, activateResult);
-              }
-
-              res.push({
-                  route : route,
-                  params : params
-              });
-          }
-      }
-      return (!this.greedyEnabled && res.length) ? false : true;
+  _attemptMatchRoute: function(res, route) {
+    var request = this.request;
+    // pass in current router for route.match so it can use the router.baseRoute
+    // run as transaction inside RouteController
+    var res = new RouteController(route).match(request);
+    return (!this.greedyEnabled && res.length) ? false : true;
   },
 
   _selfAndAncestors : function() {

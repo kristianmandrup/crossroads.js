@@ -215,14 +215,22 @@ _lexPattern: function() {
 
 It turns out that `_matchRegexp` are ilk are defined on route creation. If we want it to take into consideration
 the base route pattern where the route is mounted, we need to instead lazily evaluate on match.
-Here we assume we have a `getPattern()` method on the route which `return baseRoute() + _pattern;`
+Here we assume we have a `getPattern()` method on the route which `return this.baseRoute() + this._pattern;`
+
+However, going down this path, we would have to pass the router context around to all route methods.
+Not exactly elegant or maintainable.
 
 ```js
-var self = this;
-this._matchRegexp = function(router) {
-  var pattern = self.getPattern();
-  isRegexPattern? pattern : self.patternLexer.compilePattern(pattern, router.ignoreCase);
-}
+isRegexPattern: function(router) {
+  router = router || this._router;
+  isRegExp(this.getPattern(router))
+},
+
+getMatchRegexp: function (router) {
+  router = router || this._router;
+  var pattern = this.getPattern(router);
+  return isRegexPattern(router)? pattern : router.patternLexer.compilePattern(pattern, router.ignoreCase);
+},
 ```
 
 If we allow a route to be mounted on multiple different routers, we need to pass in the
@@ -230,15 +238,51 @@ current context, ie. the current router instance we are matching for.
 The `match` function then becomes something like...
 
 ```js
-    // pass in router for which we are matching
-    match : function (request, router) {
-        request = request || '';
-        //validate params even if regexp because of `request_` rule.
-        return this.getMatchRegexp(router).test(request) && this._validateParams(request);
-    },
+  // pass in router for which we are matching
+  match : function (request, router) {
+      request = request || '';
+      //validate params even if regexp because of `request_` rule.
+      return this.getMatchRegexp(router).test(request) && this._validateParams(request);
+  },
 ```
 
-Sweet :)
+Another, more sensible approach would be to have another class be the controller for the matching of routes.
+We could call it `RoutingController`. As it matches routes on a Router and calls `route.match()`, it should
+do it as a "transaction" such that `route._activeRouter` is set to the current router just before it starts and
+set back to `null` when done. In fact, to support these kinds of mechanics we need a thorough refactoring,
+which should be possible using the current fragmented design.
+
+It could look sth like this. A much more flexible design than "inlining" the
+routing functionality inside the Router and Route themselves.
+
+```js
+function RoutingController(router) {
+  this.router = router;
+}
+
+RoutingController.prototype = {
+  route: function(request) {
+    this.requestParser(request).parse(this.router);
+  },
+
+  requestParser: function(request) {
+    return new RequestParser(request, this.routeMatcher(request));
+  },
+
+  routeMatcher: function(request) {
+    return new RouteMatcher(request);
+  }
+};
+```
+
+Another question with regards to mounting, is whether we should mount the original instance or mount a clone.
+If we always mount a clone, we would simplify it a lot and be able to finetune the route on each mounted note
+without affecting the other mounted instances. This makes a lot of sense!
+However in other cases there might be good reason to be able to have one re-configuration of a route have
+the same effect in multiple places it is used. So for good measure, we should allow both approaches.
+The default should be not to [clone](https://www.npmjs.org/package/clone) however!
+
+`router.mount(route, clone: true)`
 
 ### Authenticating and Authorizing routes
 
