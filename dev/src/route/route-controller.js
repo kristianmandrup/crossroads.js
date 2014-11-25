@@ -8,40 +8,92 @@ function RouteController(router, route) {
 var RequestParser = require('./router/request-parser');
 var RouteMatcher  = require('./router/route-matcher');
 
-RoutingController.prototype = {
+function Result() {
+  return {
+    result: {},
+    add: function(route, params) {
+      // Result should be a class
+      this.result.push({
+        route: route,
+        params: params
+      });
+    }
+  }
+}
+
+RouteController.prototype = {
+  getParamsArray: function(x) {
+    return this.route.getParamsArray(this.request, x);
+  },
+
+  isPending: function() {
+
+  },
+
+  handlePendingActivation: function() {
+
+  },
+
+  isGreedy: function() {
+    return this.router.greedy || this.route.greedy;
+  },
+
+  matchesRoute: function() {
+    return (!res.length || this.isGreedy()) && this.matchRoute();
+  },
 
   match: function(request) {
+    // TODO: pass result!?
+    this.request = request;
     var router = this.router;
 
-    if ((!res.length || router.greedy || route.greedy) && matchRoute(request)) {
-      var allParams = route._getParamsArray(request),
-        ancestors = route._selfAndAncestors();
-
-      var i = ancestors.length;
-      while (route = ancestors[--i]) {
-        var consume = route._getParamsArray(request, true).length;
-        var params = allParams.splice(0, consume);
-        if (route.active) {
-          continue;
-        }
-
-        route.active = true;
-        var activateResult = route.activate(request);
-        if (this._isPending(activateResult)) {
-          this.handlePendingActivation(route, activateResult);
-        }
-
-        res.push({
-          route: route,
-          params: params
-        });
-      }
-      return res;
+    if (this.matchesRoute()) {
+      return this.xyz();
     }
   },
 
-  matchRoute: function(request) {
-    this.routeMatcher(request).match();
+  xyz: function() {
+    var route = this.route;
+    var i = this.ancestors().length;
+    // TODO: better loop
+    while (this.route = this.ancestors()[--i]) {
+      if (route.isActive()) {
+        continue;
+      }
+
+      var activateResult = this.activateRoute();
+      if (this.isPending(activateResult)) {
+        this.handlePendingActivation(route, activateResult);
+      }
+      result.add(route, params);
+    }
+  },
+
+  ancestors: function() {
+    return this.route._selfAndAncestors();
+  },
+
+  params: function() {
+    return this.getParamsArray().splice(0, this.consume());
+  },
+
+  consume: function() {
+    return this.getParamsArray(true).length;
+  },
+
+
+  activateRoute: function() {
+    this.route.active = true; // WHY!?
+    this.route.activate(this.request)
+  },
+
+
+  addResult: function(route, params) {
+  },
+
+
+  matchRoute: function() {
+    this.routeMatcher(this.request).match();
   },
 
   requestParser: function() {
@@ -53,3 +105,6 @@ RoutingController.prototype = {
   }
 };
 
+var baseController = require('./base-controller');
+
+RouteController.prototype = extend(RouteController.prototype, baseController);
