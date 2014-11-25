@@ -39,6 +39,8 @@ function Crossroads(name) {
     this._name = name || 'crossroads router';
     this._routes = [];
 
+    this._baseRoute = '';
+
     this._RouteClass    = route.Route;
     this._RouterClass   = Crossroads;
 
@@ -65,6 +67,10 @@ Crossroads.prototype = {
     normalizeFn : null,
 
     _signals: ['bypasses', 'routed', 'routingError', 'parsingError'],
+
+    getBaseRoute: function() {
+        return this._baseRoute;
+    },
 
     resetState : function(){
         this._prevRoutes.length = 0;

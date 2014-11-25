@@ -16,9 +16,17 @@ var RouterPiper = {
 
   pipe : function (otherRouter) {
       this._piped.push(otherRouter);
+      otherRouter._parent = this;
   },
 
   unpipe : function (otherRouter) {
       arrayRemove(this._piped, otherRouter);
+      otherRouter._parent = undefined;
+  },
+
+  // parent router where the Router is piped from
+  getParent: function() {
+    return this._parent;
   }
+
 };

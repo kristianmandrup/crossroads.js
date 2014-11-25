@@ -171,7 +171,74 @@ Methods you can override for custom functionality:
 - deactivated (extend)
 
 You can set the `Route` constructor "class" on the Router via `router._RouteClass = MyRoute`
-This allows you to esily create a custom `Route` class where you extend the base `Route` and have the router use this custom class whenever you add a route via `addRoute` or `addRoutes`. Splendid!
+This allows you to easily create a custom `Route` class where you extend the base `Route` and have the router use this custom class whenever you add a route via `addRoute` or `addRoutes`. Splendid!
+
+### Piped routers
+
+A router can contain one or more piped routers.
+If no routes match for a given request, the router will try each of the piped
+ routes in succession until one of them matches.
+
+A piped router has access to its parent via `getParent()`.
+Should we should support a router having multiple parents? I think for now it is better to limit to one parent only.
+
+A router can have a base route. when routes are added they should not know about the base route,
+but when evaluated as part of match, they should calculate their full route pattern by applying
+`baseRoute()` up the parent hierarchy. This way you can mount/dismount Routers easily without having to recalculate
+routes each time. I guess the full route name could be cached on first match attempt?
+Then clean cache when dismounted or remounted...
+
+In order to achieve this, we need to "operate" on the route matching lv.
+
+```js
+function Route(pattern, callback, priority, router, name) {
+    this._router = router;
+    this._name = name || 'unknown';
+    this._pattern = pattern;
+    this._priority = priority || 0;
+
+    this._lexPattern();
+
+_lexPattern: function() {
+  var isRegexPattern = isRegExp(this._pattern),
+      patternLexer = this._router.patternLexer,
+      pattern = this._pattern,
+      router = this.router;
+
+
+  this._paramsIds = isRegexPattern? null : patternLexer.getParamIds(pattern);
+  this._optionalParamsIds = isRegexPattern? null : patternLexer.getOptionalParamsIds(pattern);
+  this._matchRegexp = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase);
+  this._matchRegexpHead = isRegexPattern? pattern : patternLexer.compilePattern(pattern, router.ignoreCase, true);
+},
+```
+
+It turns out that `_matchRegexp` are ilk are defined on route creation. If we want it to take into consideration
+the base route pattern where the route is mounted, we need to instead lazily evaluate on match.
+Here we assume we have a `getPattern()` method on the route which `return baseRoute() + _pattern;`
+
+```js
+var self = this;
+this._matchRegexp = function(router) {
+  var pattern = self.getPattern();
+  isRegexPattern? pattern : self.patternLexer.compilePattern(pattern, router.ignoreCase);
+}
+```
+
+If we allow a route to be mounted on multiple different routers, we need to pass in the
+current context, ie. the current router instance we are matching for.
+The `match` function then becomes something like...
+
+```js
+    // pass in router for which we are matching
+    match : function (request, router) {
+        request = request || '';
+        //validate params even if regexp because of `request_` rule.
+        return this.getMatchRegexp(router).test(request) && this._validateParams(request);
+    },
+```
+
+Sweet :)
 
 ### Authenticating and Authorizing routes
 
