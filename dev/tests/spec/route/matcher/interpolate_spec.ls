@@ -1,4 +1,4 @@
-describe 'Route.interpolate )' ->
+describe 'Route.interpolate ' ->
 
     afterEach ->
         crossroads.resetState!

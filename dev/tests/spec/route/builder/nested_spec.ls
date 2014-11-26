@@ -1,172 +1,133 @@
-/*jshint onevar:false */
+describe 'nested routes' ->
 
-//for node
-var crossroads = crossroads || require('../../../../../dist/crossroads');
-//end node
+    var baseRoute, childRoute
 
+    beforeEach ->
+        # specs are run out of order since we check the amount of routes
+        # added we need to make sure other tests won't mess up these results
+        # otherwise we might spend time trying to debug the wrong issues
+        crossroads.removeAllRoutes!
+        crossroads.resetState!
 
-describe('nested routes', function(){
+        baseRoute = crossroads.addRoute '/base/{foo}'
+        childRoute = baseRoute.addRoute 'child/{bar}'
+        baseRoute.addRoute '/another/child'
 
-    var baseRoute, childRoute;
-
-    beforeEach(function(){
-        // specs are run out of order since we check the amount of routes
-        // added we need to make sure other tests won't mess up these results
-        // otherwise we might spend time trying to debug the wrong issues
-        crossroads.removeAllRoutes();
-        crossroads.resetState();
-
-        baseRoute = crossroads.addRoute('/base/{foo}');
-        childRoute = baseRoute.addRoute('child/{bar}');
-        baseRoute.addRoute('/another/child');
-    });
-
-    afterEach(function(){
-        crossroads.removeAllRoutes();
-        crossroads.resetState();
-    });
+    afterEach ->
+        crossroads.removeAllRoutes!
+        crossroads.resetState!
+    
 
 
-    describe('parse child', function(){
+    describe 'parse child' ->
+        specify 'should match the child route' ->
+            childMatched = jasmine.createSpy!
+            childRoute.matched.add childMatched
 
-        it('should match the child route', function(){
+            crossroads.parse '/base/foo/child/bar'
+            expect(childMatched).toHaveBeenCalledWith 'bar'
+       
+        specify 'should not match unkown children' ->
+            bypassed = jasmine.createSpy!
+            crossroads.bypassed.add bypassed
 
-            var childMatched = jasmine.createSpy();
-            childRoute.matched.add(childMatched);
+            crossroads.parse '/base/foo/unkown'
+            expect(bypassed).toHaveBeenCalled!
+        
+        specify 'should match the ancestor route' ->
+            ancestorMatched = jasmine.createSpy!
+            baseRoute.matched.add ancestorMatched
 
-            crossroads.parse('/base/foo/child/bar');
-            expect(childMatched).toHaveBeenCalledWith('bar');
+            crossroads.parse '/base/foo/child/bar'
+            expect(ancestorMatched).toHaveBeenCalledWith 'foo'
 
-        });
+        specify 'should switch the child route' ->
+            childSwitched = jasmine.createSpy!
+            childRoute.switched.add childSwitched
 
-        it('should not match unkown children', function(){
+            crossroads.parse '/base/foo/child/bar'
+            crossroads.parse '/base/foo/another/child'
+            expect(childSwitched).toHaveBeenCalled!
 
-            var bypassed = jasmine.createSpy();
-            crossroads.bypassed.add(bypassed);
+        
 
-            crossroads.parse('/base/foo/unkown');
-            expect(bypassed).toHaveBeenCalled();
+        specify 'should not switch the ancestor route' ->
+            ancestorSwitched = jasmine.createSpy!
+            baseRoute.switched.add ancestorSwitched
 
-        });
+            crossroads.parse '/base/foo/child/bar'
+            crossroads.parse '/base/foo/another/child'
+            expect(ancestorSwitched.calls.length).toEqual 0
 
-        it('should match the ancestor route', function(){
+        
 
-            var ancestorMatched = jasmine.createSpy();
-            baseRoute.matched.add(ancestorMatched);
+        specify 'should match the index route' ->
 
-            crossroads.parse('/base/foo/child/bar');
-            expect(ancestorMatched).toHaveBeenCalledWith('foo');
+            indexMatched = jasmine.createSpy!
+            indexRoute = baseRoute.addRoute indexMatched
 
-        });
+            crossroads.parse '/base/foo'
+            expect(indexMatched).toHaveBeenCalled!
 
-        it('should switch the child route', function(){
+    describe 'parse multiple children' ->
+        var anotherChild
 
-            var childSwitched = jasmine.createSpy();
-            childRoute.switched.add(childSwitched);
+        beforeEach ->
+            crossroads.greedy = true
+            anotherChild = baseRoute.addRoute '/{child}/bar'
+        
+        afterEach ->
+            crossroads.greedy = false
+        
+        specify 'should match both children' ->
+            childMatched = jasmine.createSpy!
+            childRoute.matched.add childMatched
+            anotherChild.matched.add childMatched
 
-            crossroads.parse('/base/foo/child/bar');
-            crossroads.parse('/base/foo/another/child');
-            expect(childSwitched).toHaveBeenCalled();
+            crossroads.parse '/base/foo/child/bar'
+            expect(childMatched.calls.length).toEqual 2
 
-        });
+        
 
-        it('should not switch the ancestor route', function(){
+        specify 'should match ancestors only once' ->
+            parentMatched = jasmine.createSpy!
+            baseRoute.matched.add parentMatched
 
-            var ancestorSwitched = jasmine.createSpy();
-            baseRoute.switched.add(ancestorSwitched);
+            crossroads.parse '/base/foo/child/bar'
+            expect(parentMatched.calls.length).toEqual 1
+        
 
-            crossroads.parse('/base/foo/child/bar');
-            crossroads.parse('/base/foo/another/child');
-            expect(ancestorSwitched.calls.length).toEqual(0);
+    describe 'parse different bases' ->
+        beforeEach ->
+            crossroads.addRoute '/another'
 
-        });
+        specify 'should switch the child route' ->
+            childSwitched = jasmine.createSpy!
+            childRoute.switched.add childSwitched
 
-        it('should match the index route', function(){
+            crossroads.parse '/base/foo/child/bar'
+            crossroads.parse '/another'
+            expect(childSwitched).toHaveBeenCalled!
 
-            var indexMatched = jasmine.createSpy(),
-                indexRoute = baseRoute.addRoute(indexMatched)
+        specify 'should switch the ancestor route' ->
+            ancestorSwitched = jasmine.createSpy!
+            baseRoute.switched.add ancestorSwitched
 
-            crossroads.parse('/base/foo');
-            expect(indexMatched).toHaveBeenCalled();
+            crossroads.parse '/base/foo/child/bar'
+            crossroads.parse '/another'
+            expect(ancestorSwitched).toHaveBeenCalled!
 
-        });
+        specify 'should match only parent' ->
+            childMatched = jasmine.createSpy!
+            parentMatched = jasmine.createSpy!
+            childRoute.matched.add childMatched
+            baseRoute.matched.add parentMatched
 
-    });
+            crossroads.parse '/base/foo'
+            expect(childMatched.calls.length).toEqual 0
+            expect(parentMatched).toHaveBeenCalled!
 
+        
 
-    describe('parse multiple children', function(){
+    
 
-        var anotherChild;
-
-        beforeEach(function(){
-            crossroads.greedy = true;
-            anotherChild = baseRoute.addRoute('/{child}/bar');
-        });
-
-        afterEach(function(){
-            crossroads.greedy = false;
-        });
-
-        it('should match both children', function(){
-
-            var childMatched = jasmine.createSpy();
-            childRoute.matched.add(childMatched);
-            anotherChild.matched.add(childMatched);
-
-            crossroads.parse('/base/foo/child/bar');
-            expect(childMatched.calls.length).toEqual(2);
-
-        });
-
-        it('should match ancestors only once', function(){
-            var parentMatched = jasmine.createSpy();
-            baseRoute.matched.add(parentMatched);
-
-            crossroads.parse('/base/foo/child/bar');
-            expect(parentMatched.calls.length).toEqual(1);
-        });
-
-    });
-
-    describe('parse different bases', function(){
-
-        beforeEach(function(){
-            crossroads.addRoute('/another');
-        });
-
-        it('should switch the child route', function(){
-
-            var childSwitched = jasmine.createSpy();
-            childRoute.switched.add(childSwitched);
-
-            crossroads.parse('/base/foo/child/bar');
-            crossroads.parse('/another');
-            expect(childSwitched).toHaveBeenCalled();
-
-        });
-
-        it('should switch the ancestor route', function(){
-
-            var ancestorSwitched = jasmine.createSpy();
-            baseRoute.switched.add(ancestorSwitched);
-
-            crossroads.parse('/base/foo/child/bar');
-            crossroads.parse('/another');
-            expect(ancestorSwitched).toHaveBeenCalled();
-
-        });
-
-        it('should match only parent', function() {
-            var childMatched = jasmine.createSpy();
-            var parentMatched = jasmine.createSpy();
-            childRoute.matched.add(childMatched);
-            baseRoute.matched.add(parentMatched);
-
-            crossroads.parse('/base/foo');
-            expect(childMatched.calls.length).toEqual(0);
-            expect(parentMatched).toHaveBeenCalled();
-
-        });
-
-    });
-});
