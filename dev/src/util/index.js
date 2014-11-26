@@ -1,5 +1,6 @@
 module.exports = {
-  ErrorHandler:     require('./error_handler'),
-  PatternLexer:     require('./pattern_lexer'),
-  RoutesList:       require('./routes_list')
+  ErrorHandler:       require('./error_handler'),
+  PatternLexer:       require('./pattern_lexer'),
+  RoutesList:         require('./routes_list'),
+  PatternNormalizer:  require('./pattern-normalizer')
 };

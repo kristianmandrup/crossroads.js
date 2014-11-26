@@ -1,38 +1,43 @@
 var Xtender         = require('../utils').Xtender;
 var RouteContainer  = require('../routable/route_container');
 var RouteParser     = require('./route-parser');
+PatternNormalizer   = require('../utils').PatternNormalizer;
 
-var CompRoute = {
+module.exports = Xtender.extend(RouteContainer, RouteComposer.prototype);
+
+function RouteComposer(router) {
+  this.router = router;
+}
+
+RouteComposer.prototype = {
   // For nested route only?
   addRoute : function (route_or_pattern, options) {
-    var routeObj = new RouteParser().parse(route_or_pattern, options);
+    var routeObj = new RouteParser(this).parse(route_or_pattern, options);
+    routeObj.pattern = this.fullPattern();
+    return this._addRoute(this.addRouteToRouter(routeObj));
+  },
 
-    var basePattern = this._pattern,
-      route;
+  addRouteToRouter: function(routeObj) {
+    return this._router.addRoute(routeObj);
+  },
 
-    if (!pattern || typeof pattern === 'function') {
-      priority = handler;
-      handler = pattern;
-      pattern = '';
-    }
-
-    if (basePattern[basePattern.length-1] === '/')
-      basePattern = basePattern.slice(0, -1);
-    if (pattern[0] !== '/')
-      basePattern = basePattern + '/';
-
-    route = this._router.addRoute(basePattern + pattern, handler, priority);
+  _addRoute: function(route) {
     route._parent = this;
     this._routes.push(route);
 
     // index routes should be matched together with parent route
-    if (!pattern.length || pattern === '/')
+    if (!route.pattern.length || route.pattern === '/')
       route.greedy = true;
 
     this._routeAdded(route);
-    return route;
+  },
+
+
+  fullPattern: function() {
+    return this.basePattern() + this.pattern;
+  },
+
+  basePattern: function() {
+    return new PatternNormalizer(this.basePattern()).normalize();
   }
 };
-
-var CompositeRoute = Xtender.extend(RouteContainer, CompRoute);
-module.exports = CompositeRoute;
