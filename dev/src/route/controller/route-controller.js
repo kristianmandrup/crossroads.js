@@ -8,18 +8,6 @@ function RouteController(router, route) {
 var RequestParser = require('./router/request-parser');
 var RouteMatcher  = require('./router/route-matcher');
 
-function Result() {
-  return {
-    result: {},
-    add: function(route, params) {
-      // Result should be a class
-      this.result.push({
-        route: route,
-        params: params
-      });
-    }
-  }
-}
 
 RouteController.prototype = {
   getParamsArray: function(x) {
