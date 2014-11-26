@@ -32,7 +32,8 @@
         "gulp" : "x",
         "gulp-webpack": "x",
         "webpack": "x",
-        "xtend" : "x"
+        "xtend" : "x",
+        "chai" : "x"
     },
     "scripts" : {
         "pretest" : "node build",
