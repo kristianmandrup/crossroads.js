@@ -6,7 +6,7 @@ module.exports = RouteMatcher;
 // depends on RequestParser
 
 var RequestParser = require('./request_parser');
-var Xtender = require('../utils').Xtender;
+var Xtender = require('../../utils').Xtender;
 
 RouteMatcher = Xtender.extend(RequestParser, RouteMatcher);
 
