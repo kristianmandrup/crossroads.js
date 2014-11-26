@@ -1,6 +1,6 @@
 module.exports = RouteParser;
 
-var Xtender    = require('../utils').Xtender;
+var Xtender    = require('../../utils').Xtender;
 
 function RouteParser(ctx) {
   this.ctx = ctx;

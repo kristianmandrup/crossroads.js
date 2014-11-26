@@ -1,4 +1,4 @@
-var arrayRemove = require('../utils').arrayRemove;
+var arrayRemove = require('../../utils').arrayRemove;
 
 module.exports = Piper;
 

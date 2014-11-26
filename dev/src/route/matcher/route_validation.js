@@ -2,7 +2,7 @@ module.exports = RouteValidation;
 
 // _validateParams(request), _isValidParam(request, prop, values), _isValidArrayRule(arr, val),
 
-var util = require('../utils');
+var util = require('../../utils');
 
 var RouteValidation = {
   _validateParams : function (request) {

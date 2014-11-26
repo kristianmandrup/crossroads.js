@@ -1,7 +1,7 @@
-var Xtender         = require('../utils').Xtender;
-var RouteContainer  = require('../routable/route_container');
+var Xtender         = require('../../utils').Xtender;
+var RouteContainer  = require('../../routable/route_container');
 var RouteParser     = require('./route-parser');
-PatternNormalizer   = require('../utils').PatternNormalizer;
+PatternNormalizer   = require('../../utils').PatternNormalizer;
 
 module.exports = Xtender.extend(RouteContainer, RouteComposer.prototype);
 

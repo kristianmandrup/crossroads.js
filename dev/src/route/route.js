@@ -1,6 +1,6 @@
-var utils = require('./utils');
+var utils = require('./../utils');
 var route = require('./route');
-var BaseRoutable = require('./routable/base_routable');
+var BaseRoutable = require('./../routable/base_routable');
 
 var Xtender = utils.Xtender;
 
