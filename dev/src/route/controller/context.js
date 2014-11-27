@@ -1,7 +1,17 @@
 module.exports = Context;
 
-function Context(request, router, route) {
+function Context(request, routable) {
   this.request = request;
-  this.route = route;
-  this.router = router;
+  if (routable) {
+    this.push(routable);
+  }
 }
+
+Context.prototype = {
+  push: function(routable) {
+    this.contextStack.push(routable);
+  },
+  pop: function() {
+    this.contextStack.pop();
+  }
+};
